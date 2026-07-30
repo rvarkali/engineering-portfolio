@@ -1,0 +1,67 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+*.secret
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Dependencies
+node_modules/
+vendor/
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build output
+dist/
+build/
+out/
+.next/
+coverage/
+htmlcov/
+*.test
+
+# Generated artifacts
+generated/
+*.generated.*
+*.pb.go
+
+# Temporary files and logs
+.tmp/
+tmp/
+*.tmp
+*.log
+logs/
+
+# Terraform state
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+
+# Local certificates and private keys
+certs/local/
+private/
+
+# Profiling output
+*.prof
+*.pprof
+profile.out

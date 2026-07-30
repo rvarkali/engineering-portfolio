@@ -1,0 +1,55 @@
+name: Documentation Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify required documentation
+        shell: bash
+        run: |
+          required=(
+            README.md
+            LICENSE
+            CONTRIBUTING.md
+            SECURITY.md
+            CODE_OF_CONDUCT.md
+            CHANGELOG.md
+            docs/architecture.md
+            docs/security.md
+            docs/testing.md
+            docs/roadmap.md
+            docs/demo-plan.md
+            docs/decisions/README.md
+            docs/decisions/0001-project-scope.md
+          )
+          for file in "${required[@]}"; do
+            test -f "$file" || { echo "Missing $file"; exit 1; }
+          done
+
+      - name: Markdown lint
+        uses: DavidAnson/markdownlint-cli2-action@v19
+        with:
+          globs: "**/*.md"
+
+      - name: Markdown link check
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress --accept 200,429 "**/*.md"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
