@@ -15,7 +15,7 @@ export const experienceHighlights = [
     company: "Asurion",
     role: "Principal Software Engineer",
     focus:
-      "Delivered customer-facing mobile backup and restore systems using multi-tenant microservices, AWS Kinesis, Redis, Kubernetes, horizontal scaling, partial-failure handling, and retry-oriented long-running workflows."
+      "Delivered customer-facing mobile backup and restore systems on multi-tenant microservices. Used AWS Kinesis, Redis, Kubernetes, horizontal scaling, and partial-failure/retry workflows for long-running distributed operations."
   },
   {
     company: "Apple / Wipro",

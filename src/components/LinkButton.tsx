@@ -21,7 +21,7 @@ export function LinkButton({
 
   return (
     <Link
-      className={`inline-flex min-h-11 items-center justify-center rounded-md border px-4 py-2 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-300 ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center rounded-md border px-4 py-2 text-sm font-[600] leading-[1.35] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-300 ${className}`}
       href={href}
       target={newTab ? "_blank" : undefined}
       rel={newTab ? "noopener noreferrer" : undefined}

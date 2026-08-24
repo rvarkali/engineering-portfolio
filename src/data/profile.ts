@@ -7,7 +7,7 @@ export const profile = {
   summary:
     "Designing and building highly available distributed platforms, cloud-native backend systems, and AI-enabled engineering infrastructure.",
   about:
-    "Hands-on Senior Staff / Principal-level technical leader focused on distributed backend systems, cloud-native architecture, platform engineering, large-scale microservices, observability, reliability, secure service architectures, applied AI infrastructure, and architecture leadership.",
+    "Hands-on Senior Staff / Principal-level engineer designing distributed backend platforms, cloud-native systems, and secure AI-enabled infrastructure. I combine architecture ownership with hands-on implementation in Go and Java, with a focus on scalability, reliability, observability, and technical leadership.",
   languages: ["Go", "Java"],
   domain: siteUrl,
   github: "https://github.com/rvarkali",
@@ -22,13 +22,17 @@ export const recognition = [
   "IBM Bravo Award"
 ];
 
-export const education = [
-  "M.Tech, Computer Science and Engineering — Indian Institute of Technology Madras",
-  "B.Tech, Civil Engineering — Osmania University",
-  "AWS Certified Solutions Architect — Associate",
-  "Zscaler Zero Trust Cyber Associate (ZTCA)",
-  "Deep Learning Specialization — DeepLearning.AI (Coursera)"
-];
+export const credentials = {
+  education: [
+    "M.Tech, Computer Science and Engineering — Indian Institute of Technology Madras",
+    "B.Tech, Civil Engineering — Osmania University"
+  ],
+  certifications: [
+    "AWS Certified Solutions Architect — Associate",
+    "Zscaler Zero Trust Cyber Associate (ZTCA)",
+    "Deep Learning Specialization — DeepLearning.AI (Coursera)"
+  ]
+};
 
 export const expertiseGroups = [
   {
@@ -40,7 +44,8 @@ export const expertiseGroups = [
       "gRPC",
       "High Availability",
       "Fault Tolerance",
-      "Caching / Rate Limiting"
+      "Caching",
+      "Rate Limiting"
     ]
   },
   {
