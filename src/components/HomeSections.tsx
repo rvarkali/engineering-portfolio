@@ -129,33 +129,60 @@ function ArchitectureVisualization() {
   );
 }
 
+function AgentTrustFlow({ steps }: { steps: string[] }) {
+  return (
+    <div
+      aria-label="AgentTrust authorization flow: Start Run, Scoped JWT, Authorize Scope, Allow or Deny, Audit Decision, Execute if Allowed"
+      className="rounded-lg border border-slate-500/30 bg-ink-950/45 p-3 sm:p-4"
+    >
+      <div className="flex flex-col items-center gap-1.5">
+        {steps.map((step, index) => (
+          <div className="flex w-full flex-col items-center gap-1.5" key={step}>
+            <div className="flex min-h-10 w-full max-w-64 items-center justify-center rounded-md border border-slate-500/40 bg-slate-900/70 px-3 py-2 text-center text-sm font-medium leading-[1.25] text-slate-100 sm:max-w-72">
+              {step}
+            </div>
+            {index < steps.length - 1 ? (
+              <span
+                aria-hidden="true"
+                className="text-sm font-semibold leading-none text-blue-200/70"
+              >
+                ↓
+              </span>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function FeaturedEngineeringSection() {
-  const [project] = featuredProjects;
+  const [cloudOpsProject, agentTrustProject] = featuredProjects;
 
   return (
     <Section
       id="featured-engineering"
       eyebrow="Featured Engineering"
       title="Distributed platform reference architecture."
-      description="The primary portfolio artifact is a public reference architecture that connects implementation detail with distributed systems, reliability, security, observability, and applied AI integration."
+      description="The primary portfolio artifact remains a public distributed systems reference architecture, with a second SDK project showing applied AI security and framework integration."
     >
       <article className="rounded-lg border border-blue-300/30 bg-[linear-gradient(180deg,rgba(96,165,250,0.09),rgba(255,255,255,0.04))] p-4 shadow-soft-border sm:p-7 lg:p-8">
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-8">
           <div>
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className={metadataLabel}>{project.status}</p>
+                <p className={metadataLabel}>{cloudOpsProject.status}</p>
                 <h3 className="mt-3 text-2xl font-[620] leading-tight text-slate-50 sm:text-3xl">
-                  {project.title}
+                  {cloudOpsProject.title}
                 </h3>
               </div>
-              <LinkButton href={project.href}>View Architecture & Code →</LinkButton>
+              <LinkButton href={cloudOpsProject.href}>View Architecture & Code →</LinkButton>
             </div>
             <p className="mt-4 text-base leading-7 text-slate-300 sm:mt-5 sm:leading-8">
-              {project.description}
+              {cloudOpsProject.description}
             </p>
             <div className="mt-5 flex flex-wrap gap-1.5 sm:mt-6 sm:gap-2">
-              {project.highlights.map((highlight) => (
+              {cloudOpsProject.highlights.map((highlight) => (
                 <span className={chip} key={highlight}>
                   {highlight}
                 </span>
@@ -167,7 +194,7 @@ export function FeaturedEngineeringSection() {
                 MCP exposes selected diagnostic and service capabilities to AI clients.
               </p>
               <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
-                {project.mcp.map((tool) => (
+                {cloudOpsProject.mcp?.map((tool) => (
                   <code className={codeChip} key={tool}>
                     {tool}
                   </code>
@@ -178,6 +205,47 @@ export function FeaturedEngineeringSection() {
           <ArchitectureVisualization />
         </div>
       </article>
+      {agentTrustProject ? (
+        <article className={`${cardSurface} mt-4 p-4 sm:mt-5 sm:p-6 lg:p-7`}>
+          <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-7">
+            <div>
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <p className={metadataLabel}>{agentTrustProject.status}</p>
+                  <h3 className="mt-3 text-xl font-[620] leading-tight text-slate-50 sm:text-2xl">
+                    {agentTrustProject.title}
+                  </h3>
+                </div>
+                <LinkButton href={agentTrustProject.href} newTab>
+                  View Architecture & Code →
+                </LinkButton>
+              </div>
+              <p className="mt-4 text-sm leading-6 text-slate-300 sm:text-base sm:leading-7">
+                {agentTrustProject.description}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-1.5 sm:gap-2">
+                {agentTrustProject.highlights.map((highlight) => (
+                  <span className={chip} key={highlight}>
+                    {highlight}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-5 border-t border-white/10 pt-4 text-sm leading-6 text-slate-400">
+                <span className="font-semibold text-slate-300">MVP boundary:</span>{" "}
+                {agentTrustProject.boundary}
+              </p>
+            </div>
+            {agentTrustProject.trustFlow ? (
+              <div className="flex flex-col justify-center">
+                <p className={metadataLabel}>Authorization flow</p>
+                <div className="mt-3">
+                  <AgentTrustFlow steps={agentTrustProject.trustFlow} />
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </article>
+      ) : null}
     </Section>
   );
 }
