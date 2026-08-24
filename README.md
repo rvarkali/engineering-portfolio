@@ -2,11 +2,11 @@
 
 A professional personal engineering portfolio for Ravinder Varkali.
 
-Status: Architecture and planning phase
+Status: Phase 1 implementation started
 
 ## Problem Statement
 
-Personal engineering portfolio needs a clear, public, and implementation-ready architecture plan before source code is introduced. This repository starts with explicit scope, documentation, security planning, testing strategy, and delivery phases.
+Personal engineering portfolio needs a clear, public, implementation-backed home page while preserving the original architecture, security, testing, and delivery planning. Phase 1 introduces a static Next.js portfolio homepage and keeps production readiness, richer case studies, and deployment automation for later phases.
 
 ## Project Goals
 
@@ -15,19 +15,28 @@ Personal engineering portfolio needs a clear, public, and implementation-ready a
 - Use synthetic examples and fictional service names only.
 - Avoid claims of production readiness until implementation, testing, benchmarking, and security validation are complete.
 
-## Planned Capabilities
+## Implemented Phase 1 Capabilities
+
+- Single responsive homepage for a Senior Staff / Principal Software Engineer portfolio.
+- Sections for Hero, About, Technical Expertise, Featured Engineering, Experience Highlights, Recognition, Education and Certifications, and Contact / Footer.
+- Structured local content under `src/data/` so profile, project, and experience details can be refined without scattering copy through UI components.
+- Static rendering with Next.js App Router, React, TypeScript, and Tailwind CSS.
+- SEO metadata, Open Graph and Twitter metadata, canonical URL, Person JSON-LD, sitemap, and robots route.
+- Accessible semantic sections, keyboard-focus styles, good contrast, and reduced-motion friendly CSS.
+
+## Planned Capabilities Beyond Phase 1
 
 - Plan pages for Home, Architecture Work, Projects, Experience, About, Resume, and Contact.
 - Define professional positioning for senior engineering, distributed systems, secure cloud platforms, observability, architecture, and applied AI.
 - Plan accessibility, SEO, Open Graph metadata, structured data, sitemap, robots.txt, and privacy-conscious analytics.
 - Prepare case-study and project-showcase content without proprietary employer information.
 
-## Initial Non-Goals
+## Current Non-Goals
 
-- No application source code in the initial scaffold.
-- No dependency installation or package manager setup in this phase.
 - No production-readiness claim before validation work is complete.
 - No proprietary employer code, data, logs, schemas, architecture, or internal names.
+- No backend services, database, authentication, CMS, contact-form backend, or privacy analytics implementation in Phase 1.
+- No completed-project claims for future portfolio slots until implementation evidence exists.
 
 ## Planned Architecture Work
 
@@ -61,9 +70,20 @@ See [docs/roadmap.md](docs/roadmap.md) for phased delivery.
 
 ## Local Development
 
-Implementation has not started
+Install dependencies and run the local site:
 
-No dependencies are required for the initial documentation scaffold.
+```bash
+npm install
+npm run dev
+```
+
+Validate the implementation:
+
+```bash
+npm run typecheck
+npm run lint
+npm run build
+```
 
 ## Repository Structure
 
@@ -81,8 +101,20 @@ No dependencies are required for the initial documentation scaffold.
 ├── .markdownlint.json
 ├── .github/
 ├── docs/
+├── public/
+├── src/
+│   ├── app/
+│   ├── components/
+│   └── data/
 └── scripts/
 ```
+
+## Phase 1 Content Notes
+
+- Resume links point to `public/resume/ravinder-varkali-resume.pdf`.
+- Email is centralized in `src/data/profile.ts`.
+- Certification names are included without dates, scores, credential IDs, or verification URLs.
+- Unfinished project ideas are not rendered on the production homepage.
 
 ## Contributing
 

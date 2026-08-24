@@ -6,11 +6,11 @@ Create the initial repository structure, documentation placeholders, policy file
 
 ## Phase 1 — Architecture and ADRs
 
-Review architecture options, write ADRs, and approve the first implementation slice.
+Review architecture options, write ADRs, and approve the first implementation slice. Initial homepage implementation has begun with a static Next.js App Router site.
 
-## Phase 2 — Minimal Working Implementation
+## Phase 2 — Portfolio Content Refinement and Project Detail
 
-Create the smallest useful implementation that demonstrates the approved architecture.
+Add implementation-backed project detail, real resume artifact, exact certification details, refined contact values, and any approved dedicated pages.
 
 ## Phase 3 — Automated Tests
 

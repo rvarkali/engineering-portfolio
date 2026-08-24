@@ -2,15 +2,15 @@
 
 ## Executive Summary
 
-A professional personal engineering portfolio for Ravinder Varkali. This document captures initial considerations only and does not finalize major architecture decisions.
+A professional personal engineering portfolio for Ravinder Varkali. Phase 1 now implements the first static homepage slice while keeping broader architecture, security, testing, deployment, and production-readiness decisions open for later phases.
 
 ## Context
 
-The project uses the fictional Personal engineering portfolio context with synthetic examples. Planned technologies include Next.js, React, TypeScript, Static or mostly static deployment, Cloudflare Pages or another low-cost hosting platform.
+The project uses the personal engineering portfolio context with public-safe, non-proprietary content. Phase 1 uses Next.js, React, TypeScript, Tailwind CSS, App Router, and static export-compatible rendering.
 
 ## Problem Statement
 
-The repository needs an architecture foundation that can guide incremental implementation without prematurely locking in design choices.
+The repository needs a credible public portfolio homepage and an architecture foundation that can guide incremental implementation without prematurely locking in broader design choices.
 
 ## Goals
 
@@ -21,9 +21,9 @@ The repository needs an architecture foundation that can guide incremental imple
 
 ## Non-Goals
 
-- Finalize all major design decisions in the initial scaffold.
-- Create application source code before architecture approval.
+- Finalize all major design decisions in Phase 1.
 - Include proprietary systems, logs, data, names, or schemas.
+- Add backend services, authentication, CMS, database, contact-form handling, or analytics before requirements are approved.
 
 ## Users and Stakeholders
 
@@ -31,12 +31,14 @@ Potential stakeholders include maintainers, reviewers, portfolio readers, archit
 
 ## Functional Requirements
 
-Placeholder requirements will be refined after architecture review. Candidate capabilities include:
+Phase 1 implements:
 
-- Plan pages for Home, Architecture Work, Projects, Experience, About, Resume, and Contact.
-- Define professional positioning for senior engineering, distributed systems, secure cloud platforms, observability, architecture, and applied AI.
-- Plan accessibility, SEO, Open Graph metadata, structured data, sitemap, robots.txt, and privacy-conscious analytics.
-- Prepare case-study and project-showcase content without proprietary employer information.
+- A single static homepage.
+- Professional positioning for senior engineering, distributed systems, secure cloud platforms, platform engineering, observability, reliability, security, technical leadership, and applied AI.
+- SEO metadata, Open Graph and Twitter metadata, Person structured data, sitemap, and robots route.
+- Public-safe featured engineering, experience, recognition, education, and contact content.
+
+Future phases may add dedicated pages for architecture work, projects, experience, about, resume, and contact.
 
 ## Quality Attributes
 
@@ -44,15 +46,20 @@ Initial quality attributes include security, reliability, observability, maintai
 
 ## System Context
 
-The system context will describe external users, clients, backing services, telemetry systems, and deployment boundaries after ADR review.
+The Phase 1 system context is a static public website consumed by browsers, crawlers, and social link unfurlers. There are no runtime backing services, authentication systems, databases, or contact-form processors.
 
 ## Proposed Components
 
-Candidate components are placeholders and may change. Component selection must be validated through architecture decisions before implementation.
+Phase 1 components are organized as:
+
+- `src/app/` for App Router pages, metadata, sitemap, robots, and global styles.
+- `src/components/` for reusable homepage sections and links.
+- `src/data/` for structured profile, project, and experience content.
+- `public/` for static visual assets.
 
 ## Component Responsibilities
 
-Responsibilities will be defined once component boundaries are approved. Each component should have a clear owner, data contract, and failure model.
+Presentation components render structured local content and avoid owning canonical profile facts. Data modules own portfolio copy and placeholders that must be refined before launch.
 
 ## Data Flow
 
@@ -92,7 +99,7 @@ Observability planning will cover metrics, logs, traces, correlation identifiers
 
 ## Deployment Model
 
-Deployment options will be evaluated later. No production deployment model is finalized in this scaffold.
+The application is static-export compatible. The canonical production domain is planned as `https://ravinder.ravionxgroup.com`, but a production deployment model is not finalized in Phase 1.
 
 ## Testing Strategy
 
@@ -108,8 +115,10 @@ Alternatives will be captured through ADRs before implementation begins.
 
 ## Open Questions
 
-- Which architecture decisions must be resolved before the first implementation milestone?
-- Which demo scenario best proves the intended engineering value?
+- Which hosting target and deployment automation should be selected?
+- Should the resume be a static PDF, a dedicated route, or both?
+- Which project pages should become implementation-backed case studies first?
+- What privacy-conscious analytics, if any, should be introduced?
 - Which risks should be validated through prototypes before committing to a design?
 
 ## Architecture Approval Checklist
