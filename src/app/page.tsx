@@ -3,6 +3,7 @@ import {
   AboutSection,
   ContactSection,
   EducationSection,
+  EvidenceAtGlanceSection,
   ExperienceSection,
   ExpertiseSection,
   FeaturedEngineeringSection,
@@ -15,6 +16,7 @@ export default function Home() {
       <Hero />
       <AboutSection />
       <FeaturedEngineeringSection />
+      <EvidenceAtGlanceSection />
       <ExpertiseSection />
       <ExperienceSection />
       <RecognitionSection />

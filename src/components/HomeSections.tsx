@@ -266,6 +266,66 @@ export function FeaturedEngineeringSection() {
   );
 }
 
+const evidenceItems = [
+  {
+    category: "Concurrent correctness",
+    title: "Concurrent workflow admission",
+    project: "gRPC Microservices Reference",
+    proof:
+      "A controlled local PostgreSQL-backed experiment sent 20 equivalent Diagnostic requests with one idempotency key across five runs. Each run converged on 1 durable job, 1 idempotency record, and 1 job-created outbox event.",
+    boundary:
+      "Local correctness evidence, not a throughput, scale, latency, or production-reliability benchmark.",
+    href: "/projects/grpc-microservices-reference"
+  },
+  {
+    category: "Distributed observability",
+    title: "Joined runtime trace",
+    project: "gRPC Microservices Reference",
+    proof:
+      "Local runtime evidence shows one OpenTelemetry trace across Diagnostic service, Catalog gRPC client, Catalog service, and PostgreSQL repository work. Dependency-failure behavior was captured in the same evidence set.",
+    boundary: "This does not claim production observability, SLO validation, or availability.",
+    href: "/projects/grpc-microservices-reference"
+  },
+  {
+    category: "AI authorization boundary",
+    title: "Denied before tool execution",
+    project: "AgentTrust",
+    proof:
+      "Within AgentTrust's guarded cooperative execution boundary, service.read reached the underlying tool path once; service.restart without scope was denied before invocation, with denied invocation count 0.",
+    boundary: "This does not imply process isolation or protection from raw client/tool bypass.",
+    href: "/projects/agenttrust"
+  }
+];
+
+export function EvidenceAtGlanceSection() {
+  return (
+    <Section
+      id="evidence-at-a-glance"
+      eyebrow="Evidence at a Glance"
+      title="Three verified behaviors reviewers can scan quickly."
+    >
+      <div className="grid gap-4 lg:grid-cols-3">
+        {evidenceItems.map((item) => (
+          <article className={`${cardSurface} flex flex-col p-4 sm:p-5`} key={item.title}>
+            <p className={metadataLabel}>{item.category}</p>
+            <h3 className="mt-3 text-lg font-[620] leading-snug text-slate-50">
+              {item.title}
+            </h3>
+            <p className="mt-3 text-sm leading-6 text-slate-300">{item.proof}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-400">{item.boundary}</p>
+            <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className={mutedLabel}>{item.project}</p>
+              <LinkButton href={item.href} variant="primary">
+                View Case Study →
+              </LinkButton>
+            </div>
+          </article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 export function ExperienceSection() {
   return (
     <Section
