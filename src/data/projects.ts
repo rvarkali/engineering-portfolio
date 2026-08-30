@@ -3,7 +3,19 @@ export const repositoryLinks = {
   agentTrust: "https://github.com/ravionxgroup/agenttrust"
 };
 
-export const featuredProjects = [
+type FeaturedProject = {
+  title: string;
+  status: string;
+  description: string;
+  highlights: string[];
+  href: string;
+  caseStudyHref?: string;
+  mcp?: string[];
+  trustFlow?: string[];
+  boundary?: string;
+};
+
+export const featuredProjects: FeaturedProject[] = [
   {
     title: "gRPC Microservices Reference",
     status: "Reference architecture",
@@ -20,7 +32,8 @@ export const featuredProjects = [
       "Diagnostic Service"
     ],
     mcp: ["get_service", "create_diagnostic", "get_diagnostic"],
-    href: repositoryLinks.grpcMicroservicesReference
+    href: repositoryLinks.grpcMicroservicesReference,
+    caseStudyHref: "/projects/grpc-microservices-reference"
   },
   {
     title: "AgentTrust — Least-Privilege Identity & Audit for AI Agents",

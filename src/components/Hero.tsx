@@ -33,10 +33,12 @@ export function Hero() {
         </p>
         <div className="mt-9 flex flex-wrap gap-3">
           <LinkButton href="#featured-engineering" variant="primary">
-            View Engineering Work
+            View Engineering Work →
           </LinkButton>
           <LinkButton href={profile.github}>View GitHub</LinkButton>
-          <LinkButton href={profile.linkedin}>LinkedIn</LinkButton>
+          <LinkButton href={profile.linkedin} variant="tertiary">
+            LinkedIn
+          </LinkButton>
           <LinkButton href={profile.resume} newTab>
             Resume
           </LinkButton>

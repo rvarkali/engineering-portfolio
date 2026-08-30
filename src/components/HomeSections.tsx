@@ -176,7 +176,16 @@ export function FeaturedEngineeringSection() {
                   {cloudOpsProject.title}
                 </h3>
               </div>
-              <LinkButton href={cloudOpsProject.href}>View Architecture & Code →</LinkButton>
+              <div className="flex flex-wrap gap-3">
+                {cloudOpsProject.caseStudyHref ? (
+                  <LinkButton href={cloudOpsProject.caseStudyHref} variant="primary">
+                    View Case Study →
+                  </LinkButton>
+                ) : null}
+                <LinkButton href={cloudOpsProject.href} newTab>
+                  View Source →
+                </LinkButton>
+              </div>
             </div>
             <p className="mt-4 text-base leading-7 text-slate-300 sm:mt-5 sm:leading-8">
               {cloudOpsProject.description}
@@ -344,9 +353,13 @@ export function ContactSection() {
             </p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <LinkButton href={profile.linkedin}>LinkedIn</LinkButton>
+            <LinkButton href={profile.linkedin} variant="tertiary">
+              LinkedIn
+            </LinkButton>
             <LinkButton href={profile.github}>GitHub</LinkButton>
-            <LinkButton href={`mailto:${profile.email}`}>Email</LinkButton>
+            <LinkButton href={`mailto:${profile.email}`} variant="tertiary">
+              Email
+            </LinkButton>
             <LinkButton href={profile.resume} newTab>
               Resume
             </LinkButton>
