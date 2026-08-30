@@ -1,6 +1,7 @@
 import { credentials, expertiseGroups, profile, recognition } from "@/data/profile";
 import { experienceHighlights } from "@/data/experience";
 import { featuredProjects } from "@/data/projects";
+import { articles } from "@/data/writing";
 import { LinkButton } from "./LinkButton";
 import { Section } from "./Section";
 
@@ -302,7 +303,7 @@ export function EvidenceAtGlanceSection() {
     <Section
       id="evidence-at-a-glance"
       eyebrow="Evidence at a Glance"
-      title="Three verified behaviors reviewers can scan quickly."
+      title="Engineering claims backed by runtime evidence."
     >
       <div className="grid gap-4 lg:grid-cols-3">
         {evidenceItems.map((item) => (
@@ -322,6 +323,39 @@ export function EvidenceAtGlanceSection() {
           </article>
         ))}
       </div>
+    </Section>
+  );
+}
+
+export function WritingSection() {
+  const [article] = articles;
+
+  if (!article) {
+    return null;
+  }
+
+  return (
+    <Section
+      id="writing"
+      eyebrow="Writing / Engineering Notes"
+      title="Short technical notes from implemented systems."
+    >
+      <article className={`${cardSurface} p-4 sm:p-5`}>
+        <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <p className={metadataLabel}>{article.readingTime}</p>
+            <h3 className="mt-3 text-xl font-[620] leading-tight text-slate-50 sm:text-2xl">
+              {article.title}
+            </h3>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base sm:leading-7">
+              {article.description}
+            </p>
+          </div>
+          <LinkButton href={`/writing/${article.slug}`} variant="primary">
+            Read Note →
+          </LinkButton>
+        </div>
+      </article>
     </Section>
   );
 }

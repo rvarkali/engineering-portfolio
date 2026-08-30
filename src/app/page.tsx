@@ -7,7 +7,8 @@ import {
   ExperienceSection,
   ExpertiseSection,
   FeaturedEngineeringSection,
-  RecognitionSection
+  RecognitionSection,
+  WritingSection
 } from "@/components/HomeSections";
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
       <AboutSection />
       <FeaturedEngineeringSection />
       <EvidenceAtGlanceSection />
+      <WritingSection />
       <ExpertiseSection />
       <ExperienceSection />
       <RecognitionSection />
