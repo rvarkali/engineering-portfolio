@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import type { CaseStudy, CaseStudyDecision } from "@/data/case-studies";
+import type { CaseStudy, CaseStudyDecision, EvidenceItem } from "@/data/case-studies";
 import { LinkButton } from "./LinkButton";
 
 const pageShell = "mx-auto max-w-6xl px-5 sm:px-8";
@@ -307,6 +308,71 @@ function SimpleCardGrid({ items }: { items: string[] }) {
   );
 }
 
+function EvidenceSection({ evidence }: { evidence: NonNullable<CaseStudy["evidence"]> }) {
+  const [featuredItem, ...supportingItems] = evidence.items;
+
+  return (
+    <div className="space-y-5 sm:space-y-6">
+      {featuredItem ? <EvidenceCard item={featuredItem} priority /> : null}
+      {supportingItems.length > 0 ? (
+        <div className="grid gap-4 lg:grid-cols-3">
+          {supportingItems.map((item) => (
+            <EvidenceCard item={item} key={item.title} />
+          ))}
+        </div>
+      ) : null}
+      <div className="flex flex-col gap-4 rounded-lg border border-blue-200/25 bg-blue-200/[0.055] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <p className={compactBodyText}>{evidence.boundary}</p>
+        <LinkButton href={evidence.sourceUrl} newTab>
+          View Full Runtime Evidence →
+        </LinkButton>
+      </div>
+    </div>
+  );
+}
+
+function EvidenceCard({ item, priority = false }: { item: EvidenceItem; priority?: boolean }) {
+  return (
+    <article className={`${cardSurface} overflow-hidden`}>
+      <Link
+        aria-label={`Open full-size evidence screenshot for ${item.title}`}
+        className="block border-b border-white/[0.12] bg-slate-950/55 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-blue-300"
+        href={item.image}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Image
+          alt={item.imageAlt}
+          className="h-auto w-full"
+          height={item.imageHeight}
+          priority={priority}
+          sizes={priority ? "(min-width: 1152px) 1152px, 100vw" : "(min-width: 1024px) 33vw, 100vw"}
+          src={item.image}
+          width={item.imageWidth}
+        />
+      </Link>
+      <div className={priority ? "p-4 sm:p-6" : "p-4"}>
+        <p className={metadataLabel}>{item.category}</p>
+        <h3 className={`mt-2 ${priority ? cardTitle : compactCardTitle}`}>{item.title}</h3>
+        <p className={`mt-3 ${priority ? bodyText : compactBodyText}`}>{item.description}</p>
+        <dl className="mt-4 grid gap-3">
+          <EvidenceTerm term="Result" detail={item.result} />
+          <EvidenceTerm term="Boundary" detail={item.limitation} />
+        </dl>
+      </div>
+    </article>
+  );
+}
+
+function EvidenceTerm({ term, detail }: { term: string; detail: string }) {
+  return (
+    <div>
+      <dt className={mutedLabel}>{term}</dt>
+      <dd className={`mt-1.5 ${compactBodyText}`}>{detail}</dd>
+    </div>
+  );
+}
+
 export function CaseStudyPage({ caseStudy }: { caseStudy: CaseStudy }) {
   return (
     <main className="font-sans">
@@ -429,10 +495,21 @@ export function CaseStudyPage({ caseStudy }: { caseStudy: CaseStudy }) {
       <CaseStudySection
         id="observability"
         eyebrow="Observability"
-        title="Telemetry designed for local inspection and future evidence."
+        title="Telemetry designed for local inspection and verified evidence."
       >
         <SimpleCardGrid items={caseStudy.observability} />
       </CaseStudySection>
+
+      {caseStudy.evidence ? (
+        <CaseStudySection
+          id="runtime-evidence"
+          eyebrow="Verified Runtime Evidence"
+          title={caseStudy.evidence.title}
+          description={caseStudy.evidence.summary}
+        >
+          <EvidenceSection evidence={caseStudy.evidence} />
+        </CaseStudySection>
+      ) : null}
 
       <CaseStudySection
         id="verified"

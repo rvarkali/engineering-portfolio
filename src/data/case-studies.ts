@@ -36,6 +36,18 @@ export type VerifiedBehavior = {
   detail: string;
 };
 
+export type EvidenceItem = {
+  title: string;
+  category: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+  imageWidth: number;
+  imageHeight: number;
+  result: string;
+  limitation: string;
+};
+
 export type CaseStudy = {
   slug: string;
   title: string;
@@ -57,6 +69,13 @@ export type CaseStudy = {
   reliability: FailureBehavior[];
   security: string[];
   observability: string[];
+  evidence?: {
+    title: string;
+    summary: string;
+    sourceUrl: string;
+    items: EvidenceItem[];
+    boundary: string;
+  };
   verifiedBehavior: VerifiedBehavior[];
   tradeoffs: string[];
   nonGoals: string[];
@@ -299,8 +318,71 @@ export const caseStudies = [
       "Structured logs carry stable request and correlation metadata where supported.",
       "Metrics are designed around bounded dimensions rather than high-cardinality identifiers.",
       "Local Jaeger and Prometheus support runtime inspection in the development environment.",
-      "Runtime trace and metric evidence will be added from verified local runs."
+      "Verified runtime evidence captures selected local traces, metrics, and persistence checks from synthetic requests."
     ],
+    evidence: {
+      title: "Verified Runtime Evidence",
+      summary:
+        "Selected behaviors were reproduced locally with synthetic data and captured as runtime evidence. These artifacts demonstrate correctness, failure handling, and observability boundaries without making performance or production-scale claims.",
+      sourceUrl: `${grpcRepositoryUrl}/blob/main/docs/evidence/README.md`,
+      boundary:
+        "Verified locally with synthetic data. No performance, scalability, availability, or production-reliability claims are implied.",
+      items: [
+        {
+          title: "Joined Diagnostic-to-Catalog trace",
+          category: "Distributed trace",
+          description:
+            "A Diagnostic create request propagates W3C Trace Context across the gRPC boundary into Catalog and its PostgreSQL lookup, with Diagnostic persistence visible in the same trace.",
+          image: "/evidence/grpc/diagnostic-success-jaeger.png",
+          imageAlt:
+            "Jaeger trace showing Diagnostic CreateDiagnosticJob, Catalog GetService client and server spans, and PostgreSQL spans in one trace.",
+          imageWidth: 1684,
+          imageHeight: 491,
+          result:
+            "One trace links Diagnostic Service, the Catalog client call, Catalog Service, and PostgreSQL work.",
+          limitation: "This is observability evidence, not a latency or throughput claim."
+        },
+        {
+          title: "Catalog dependency outage",
+          category: "Failure handling",
+          description:
+            "With Catalog unavailable, Diagnostic surfaces canonical gRPC Unavailable and the failed downstream attempts remain visible in the trace.",
+          image: "/evidence/grpc/catalog-down-jaeger.png",
+          imageAlt:
+            "Jaeger trace showing a failed Diagnostic request with two failed Catalog client attempts while Catalog is unavailable.",
+          imageWidth: 1686,
+          imageHeight: 693,
+          result: "The failed request is bounded, traceable, and represented with verified retry attempts.",
+          limitation: "This does not claim failover, high availability, or dependency-aware readiness."
+        },
+        {
+          title: "Stale update rejected",
+          category: "Optimistic concurrency",
+          description:
+            "A valid Catalog update advances the resource version; a second update using the previous version is rejected with Aborted instead of overwriting newer state.",
+          image: "/evidence/grpc/concurrency-stale-aborted-terminal.png",
+          imageAlt:
+            "Terminal output showing Catalog version 1 updated to version 2 and a stale update returning Aborted.",
+          imageWidth: 1034,
+          imageHeight: 312,
+          result: "The stale writer receives Aborted after the accepted update advances the version.",
+          limitation: "This is deterministic correctness evidence, not concurrent load testing."
+        },
+        {
+          title: "Durable Diagnostic admission",
+          category: "Idempotency and outbox",
+          description:
+            "Diagnostic admission persisted one durable job, one idempotency record, and one job-created outbox row; replay returned the original job rather than creating duplicate durable work.",
+          image: "/evidence/grpc/diagnostic-db-idempotency-outbox.png",
+          imageAlt:
+            "PostgreSQL output showing one Diagnostic job row, one idempotency record, one unpublished job-created outbox row, and one durable job for the idempotency key.",
+          imageWidth: 714,
+          imageHeight: 567,
+          result: "One idempotency key maps to one durable job and one unpublished job-created outbox row.",
+          limitation: "Outbox publication and worker execution are not claimed."
+        }
+      ]
+    },
     verifiedBehavior: [
       {
         label: "Service registration",
@@ -353,7 +435,7 @@ export const caseStudies = [
       "Add asynchronous workflows where decoupling adds clear value.",
       "Capture deeper failure-testing evidence from repeatable local runs.",
       "Run measured load experiments and document the results.",
-      "Add verified trace and metric artifacts from Jaeger and Prometheus.",
+      "Expand verified trace and metric artifacts as new runtime behaviors are implemented.",
       "Integrate controlled AI or MCP diagnostic adapters through documented APIs.",
       "Add optional experience or API layers without changing service ownership boundaries."
     ]
