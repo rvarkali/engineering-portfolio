@@ -51,6 +51,7 @@ export const featuredProjects: FeaturedProject[] = [
     ],
     boundary:
       "Soft in-process enforcement for cooperative first-party code; hard out-of-process enforcement remains roadmap work.",
-    href: repositoryLinks.agentTrust
+    href: repositoryLinks.agentTrust,
+    caseStudyHref: "/projects/agenttrust"
   }
 ];

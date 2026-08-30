@@ -225,9 +225,16 @@ export function FeaturedEngineeringSection() {
                     {agentTrustProject.title}
                   </h3>
                 </div>
-                <LinkButton href={agentTrustProject.href} newTab>
-                  View Architecture & Code →
-                </LinkButton>
+                <div className="flex flex-wrap gap-3">
+                  {agentTrustProject.caseStudyHref ? (
+                    <LinkButton href={agentTrustProject.caseStudyHref} variant="primary">
+                      View Case Study →
+                    </LinkButton>
+                  ) : null}
+                  <LinkButton href={agentTrustProject.href} newTab>
+                    View Source →
+                  </LinkButton>
+                </div>
               </div>
               <p className="mt-4 text-sm leading-6 text-slate-300 sm:text-base sm:leading-7">
                 {agentTrustProject.description}
