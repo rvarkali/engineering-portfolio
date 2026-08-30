@@ -40,7 +40,7 @@ Personal engineering portfolio needs a clear, public, implementation-backed home
 
 ## Planned Architecture Work
 
-Initial architecture work will evaluate professional and premium UX, responsive design, accessibility, SEO, Open Graph metadata, Person structured data, sitemap, robots.txt, architecture case studies, GitHub project showcase, resume download, LinkedIn link, GitHub link, professional inquiries form, privacy-conscious analytics, RavionX-inspired indigo, blue, and violet visual accents, no public Open to Work messaging, no proprietary employer information. Planned deployment URL: https://ravinder.ravionxgroup.com. Target audience includes engineering recruiters, hiring managers, senior staff engineers, principal engineers, software architects, and architecture interviewers.
+Initial architecture work will evaluate professional and premium UX, responsive design, accessibility, SEO, Open Graph metadata, Person structured data, sitemap, robots.txt, architecture case studies, GitHub project showcase, resume download, LinkedIn link, GitHub link, professional inquiries form, privacy-conscious analytics, a restrained indigo, blue, and violet technical visual system, no public Open to Work messaging, no proprietary employer information. Planned deployment URL: https://ravinder.ravionxgroup.com. Target audience includes engineering recruiters, hiring managers, senior staff engineers, principal engineers, software architects, and architecture interviewers.
 
 ## Planned Security Work
 
