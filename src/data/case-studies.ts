@@ -23,6 +23,12 @@ export type RequestFlow = {
   title: string;
   summary: string;
   steps: string[];
+  asset?: {
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
+  };
   layout?: "linear" | "authorization-branch";
   branches?: {
     deny: string[];
@@ -76,6 +82,12 @@ export type CaseStudy = {
     components: string[];
     telemetry: string[];
     diagram?: "grpc-services" | "agenttrust-boundary";
+    asset?: {
+      src: string;
+      alt: string;
+      width: number;
+      height: number;
+    };
     securityBoundaryPath?: string[];
     outsideBoundaryLabel?: string;
     outsideBoundary?: string;
@@ -202,6 +214,12 @@ export const caseStudies = [
       summary:
         "The runtime centers on Catalog and Diagnostic services. Callers authenticate at service boundaries, Diagnostic performs Catalog lookups through a gRPC client where required, each service persists through its own PostgreSQL ownership boundary, and telemetry flows through OpenTelemetry into local observability tools.",
       diagram: "grpc-services",
+      asset: {
+        src: "/projects/grpc-reference/system-architecture.png",
+        alt: "System architecture diagram for the gRPC Microservices Reference showing client, authorization, Diagnostic Service, Catalog Service, service-owned PostgreSQL schemas, OpenTelemetry Collector, Jaeger, and Prometheus.",
+        width: 1536,
+        height: 1024
+      },
       components: [
         "Caller / client",
         "JWT authentication and RBAC authorization",
@@ -250,6 +268,12 @@ export const caseStudies = [
           "Diagnostics persistence",
           "Response"
         ],
+        asset: {
+          src: "/projects/grpc-reference/diagnostic-job-flow.png",
+          alt: "Diagnostic job request flow diagram showing client request, authentication and authorization, Diagnostic Service, Catalog Service lookup, persistence, response, telemetry, and failure scenarios.",
+          width: 1536,
+          height: 1024
+        },
         notes: [
           "Deadlines bound downstream Catalog calls.",
           "Authorization is enforced before protected service behavior.",
@@ -358,7 +382,7 @@ export const caseStudies = [
       "Logs and telemetry avoid recording authorization headers or secrets by default."
     ],
     observability: [
-      "OpenTelemetry instrumentation covers service requests and internal work paths documented by the reference implementation.",
+      "OpenTelemetry instrumentation covers distributed traces for service requests and internal work paths documented by the reference implementation.",
       "Structured logs carry stable request and correlation metadata where supported.",
       "Metrics are designed around bounded dimensions rather than high-cardinality identifiers.",
       "Local Jaeger and Prometheus support runtime inspection in the development environment.",
@@ -552,6 +576,12 @@ export const caseStudies = [
       summary:
         "The host application starts an AgentTrust run, receives a scoped in-process run identity, routes tool or MCP calls through guarded adapters, and gets an allow-or-deny decision before execution. Audit records capture the decision and outcome for calls inside that path.",
       diagram: "agenttrust-boundary",
+      asset: {
+        src: "/projects/agenttrust/system-architecture.png",
+        alt: "AgentTrust system architecture presentation diagram showing an AI agent or framework, AgentTrust SDK identity validation, authorization, tool execution, local audit logging, and supported adapters.",
+        width: 1536,
+        height: 1024
+      },
       securityBoundaryPath: [
         "Host / Agent",
         "AgentTrust guarded execution boundary",
@@ -613,6 +643,12 @@ export const caseStudies = [
         branches: {
           deny: ["Audit deny", "ToolDenied", "No execution"],
           allow: ["Execute guarded tool", "Audit outcome"]
+        },
+        asset: {
+          src: "/projects/agenttrust/tool-execution-flow.png",
+          alt: "AgentTrust tool execution flow presentation diagram showing an agent request, identity validation, authorization, allowed tool execution, local audit logging, deny path, and response.",
+          width: 1536,
+          height: 1024
         },
         notes: [
           "Authorization precedes execution for guarded calls.",
@@ -883,6 +919,262 @@ export const caseStudies = [
       reliability: "Authorization Failure Behavior",
       observability: "Auditability"
     }
+  },
+  {
+    slug: "observability-troubleshooting-platform",
+    title: "Observability & Troubleshooting Platform",
+    eyebrow: "Professional Experience",
+    summary:
+      "Designed a distributed troubleshooting platform operating across hundreds of thousands of nodes, reducing diagnostic workflows from hours to minutes while limiting direct infrastructure access.",
+    repositoryUrl: "/",
+    stack: [
+      "Go",
+      "Java",
+      "Kubernetes",
+      "Redis",
+      "PostgreSQL",
+      "OpenTelemetry",
+      "Distributed Systems",
+      "Platform Engineering"
+    ],
+    demonstrates: [
+      {
+        title: "Distributed Platform",
+        items: [
+          "fleet-wide diagnostics",
+          "job orchestration",
+          "backend coordination",
+          "operational workflows"
+        ]
+      },
+      {
+        title: "Large-Scale Fleet",
+        items: [
+          "hundreds of thousands of nodes",
+          "high-frequency communication",
+          "connection reduction",
+          "bursty workload handling"
+        ]
+      },
+      {
+        title: "Secure Operations",
+        items: [
+          "role-based access",
+          "least-privilege workflows",
+          "auditability",
+          "reduced direct infrastructure access"
+        ]
+      },
+      {
+        title: "Observability",
+        items: [
+          "metrics",
+          "logs",
+          "traces",
+          "operational visibility"
+        ]
+      }
+    ],
+    problem:
+      "Troubleshooting complex issues across a large distributed infrastructure was slow, manual, and operationally risky. The platform provided a scalable way to collect diagnostics, run approved workflows, and surface actionable information without requiring engineers to directly access infrastructure.",
+    constraints: [
+      "Keep the page public-safe by omitting proprietary implementation details, internal service names, customer information, and operational data.",
+      "Use high-level architecture boundaries rather than private service or API names.",
+      "Present scale and impact as approximate professional experience outcomes, not public benchmarks or SLA claims.",
+      "Describe the system in terms of platform capabilities that can be discussed without exposing confidential operations."
+    ],
+    architecture: {
+      summary:
+        "Support engineers used a client-facing workflow to initiate diagnostics. A control plane handled authentication, authorization, request validation, and job orchestration. An execution layer scheduled work against distributed node agents, while PostgreSQL, Redis, OpenTelemetry, and access-control systems supported persistence, coordination, visibility, and secure operation.",
+      components: [
+        "Support engineers / client",
+        "Control plane",
+        "Execution / orchestration layer",
+        "Distributed nodes / agents",
+        "PostgreSQL",
+        "Redis",
+        "OpenTelemetry",
+        "Security and access control"
+      ],
+      telemetry: [
+        "OpenTelemetry",
+        "Metrics",
+        "Logs",
+        "Traces"
+      ],
+      securityBoundaryPath: [
+        "Support engineers / client",
+        "Control plane",
+        "Execution layer",
+        "Distributed nodes / agents"
+      ],
+      outsideBoundaryLabel: "Private implementation details",
+      outsideBoundary:
+        "Internal service names, customer details, private APIs, and operational procedures are intentionally omitted."
+    },
+    responsibilities: [
+      {
+        service: "Control Plane",
+        owns: [
+          "authentication and authorization",
+          "request validation",
+          "job orchestration",
+          "workflow state"
+        ],
+        exposes: [
+          "diagnostic request workflow",
+          "status and result views",
+          "auditable operations"
+        ],
+        dependsOn: [
+          "PostgreSQL",
+          "Redis",
+          "OpenTelemetry",
+          "execution layer"
+        ],
+        persistence: "PostgreSQL for jobs, metadata, and results."
+      },
+      {
+        service: "Execution Layer",
+        owns: [
+          "task scheduling",
+          "agent selection",
+          "command dispatch",
+          "failure handling"
+        ],
+        exposes: [
+          "approved diagnostic execution",
+          "agent coordination",
+          "execution status"
+        ],
+        dependsOn: [
+          "distributed node agents",
+          "queueing and coordination",
+          "secure communication"
+        ],
+        persistence: "Redis-backed coordination for queues, state, and heartbeats."
+      }
+    ],
+    requestFlows: [
+      {
+        title: "Troubleshooting Workflow",
+        summary:
+          "A support engineer initiates an approved diagnostic request. The platform validates access, coordinates execution, collects results, and emits telemetry for operational visibility.",
+        steps: [
+          "Support engineer request",
+          "Control plane validation",
+          "Execution orchestration",
+          "Distributed node agents",
+          "Results and telemetry"
+        ],
+        notes: [
+          "Requests are authorized before execution.",
+          "Communication is represented at a conceptual level.",
+          "Operational details and private implementation names are omitted."
+        ]
+      }
+    ],
+    decisions: [
+      {
+        title: "Scalable backend coordination",
+        context:
+          "The platform had to coordinate diagnostic jobs across many nodes and environments.",
+        decision:
+          "Use a control-plane and execution-layer split with explicit state, queueing, and worker coordination.",
+        consequence:
+          "The split improves scale and operability, while requiring careful state management and failure handling."
+      },
+      {
+        title: "Aggregated agent communication",
+        context:
+          "High-frequency independent agent communication created backend connection pressure.",
+        decision:
+          "Reduce fan-out through local aggregation, batched check-ins, and pipelined communication.",
+        consequence:
+          "Connection pressure dropped from roughly 40K to 10K in the observed optimization, while adding coordination complexity."
+      },
+      {
+        title: "Least-privilege troubleshooting",
+        context:
+          "Direct infrastructure access was risky and difficult to scale across support workflows.",
+        decision:
+          "Route diagnostics through controlled, auditable workflows with role-based access.",
+        consequence:
+          "Operational risk is reduced, but workflow design must keep approved paths useful and reliable."
+      },
+      {
+        title: "Observable operations",
+        context:
+          "Operators needed to understand system behavior, failures, and diagnostic execution.",
+        decision:
+          "Build metrics, logs, and traces into the platform using OpenTelemetry-oriented observability.",
+        consequence:
+          "Troubleshooting becomes easier to inspect, but telemetry volume and signal quality need active management."
+      }
+    ],
+    reliability: [
+      {
+        scenario: "Partial distributed failures",
+        behavior:
+          "The platform was designed for retries, timeouts, and graceful degradation across node and service boundaries."
+      },
+      {
+        scenario: "Bursty diagnostic workloads",
+        behavior:
+          "Aggregation, batching, and queueing helped absorb high-frequency communication and workload spikes."
+      },
+      {
+        scenario: "Operational visibility gaps",
+        behavior:
+          "Metrics, logs, and traces exposed enough system behavior for inspection and continuous improvement."
+      }
+    ],
+    security: [
+      "Role-based access limited who could initiate troubleshooting workflows.",
+      "Approved workflows reduced the need for direct infrastructure access.",
+      "Auditability made operational actions easier to review.",
+      "Secure communication and least privilege were core design constraints."
+    ],
+    observability: [
+      "Metrics tracked platform health and operational behavior.",
+      "Structured logs supported troubleshooting and audit review.",
+      "Traces helped inspect request and execution paths.",
+      "Alerting and visibility supported rollout and production operations."
+    ],
+    verifiedBehavior: [
+      {
+        label: "Troubleshooting workflow reduction",
+        detail:
+          "Professional experience included reducing diagnostic workflows from roughly two hours to roughly fifteen minutes."
+      },
+      {
+        label: "Fleet-scale support",
+        detail:
+          "The platform scaled to support more than 500,000 nodes across multiple environments."
+      },
+      {
+        label: "Support engineering adoption",
+        detail:
+          "The platform supported a large support engineering organization of roughly 1,000 engineers."
+      }
+    ],
+    tradeoffs: [
+      "Aggregation lowered connection pressure but introduced coordination complexity.",
+      "Controlled workflows reduced risk but required careful product and operations alignment.",
+      "High observability improved inspection while adding signal-management and storage considerations."
+    ],
+    nonGoals: [
+      "No proprietary implementation details.",
+      "No internal service names.",
+      "No customer information.",
+      "No private APIs or operational procedures.",
+      "No public benchmark, SLA, or current production claim."
+    ],
+    futureExtensions: [
+      "Broader product adoption.",
+      "Deeper automation for recurring diagnostic workflows.",
+      "Continued reliability and observability improvements."
+    ]
   }
 ] satisfies CaseStudy[];
 

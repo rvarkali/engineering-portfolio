@@ -16,11 +16,11 @@ export function LinkButton({
 }: LinkButtonProps) {
   const variantClassNames = {
     primary:
-      "border-blue-300/65 bg-blue-400/16 text-white hover:border-blue-200 hover:bg-blue-400/24",
+      "border-portfolio-accent bg-portfolio-accent text-white shadow-sm shadow-blue-700/15 hover:border-blue-700 hover:bg-blue-700",
     secondary:
-      "border-slate-500/35 bg-white/[0.03] text-slate-100 hover:border-slate-300/70 hover:bg-white/[0.06]",
+      "border-portfolio-border bg-white text-portfolio-ink hover:border-portfolio-accent hover:bg-portfolio-atmosphere",
     tertiary:
-      "border-transparent bg-transparent text-slate-300 hover:text-slate-50 hover:bg-white/[0.04]"
+      "border-transparent bg-transparent text-portfolio-accent hover:bg-portfolio-atmosphere hover:text-blue-700"
   };
 
   return (

@@ -12,11 +12,12 @@ type WritingPageProps = {
 };
 
 const pageShell = "mx-auto max-w-4xl px-5 sm:px-8";
-const cardSurface = "rounded-lg border border-white/[0.14] bg-white/[0.045] shadow-soft-border";
+const cardSurface =
+  "rounded-lg border border-portfolio-border bg-white shadow-[0_10px_35px_rgba(15,45,88,0.06)]";
 const labelText = "text-xs font-semibold uppercase tracking-[0.16em]";
-const metadataLabel = `${labelText} text-blue-200`;
-const mutedLabel = `${labelText} text-slate-400`;
-const bodyText = "text-base leading-8 text-slate-200/90";
+const lightMetadataLabel = `${labelText} text-portfolio-accent`;
+const lightMutedLabel = `${labelText} text-portfolio-muted`;
+const bodyText = "text-base leading-8 text-portfolio-body";
 
 export const dynamicParams = false;
 
@@ -62,7 +63,7 @@ export async function generateMetadata({ params }: WritingPageProps): Promise<Me
 function ParagraphSection({ section }: { section: Extract<ArticleSection, { kind: "paragraphs" }> }) {
   return (
     <section className="py-7 sm:py-8">
-      <h2 className="text-2xl font-[620] leading-tight text-slate-50">{section.title}</h2>
+      <h2 className="text-2xl font-[620] leading-tight text-portfolio-ink">{section.title}</h2>
       <div className="mt-4 space-y-4">
         {section.paragraphs.map((paragraph) => (
           <p className={bodyText} key={paragraph}>
@@ -77,22 +78,22 @@ function ParagraphSection({ section }: { section: Extract<ArticleSection, { kind
 function SequenceSection({ section }: { section: Extract<ArticleSection, { kind: "sequence" }> }) {
   return (
     <section className="py-7 sm:py-8">
-      <h2 className="text-2xl font-[620] leading-tight text-slate-50">{section.title}</h2>
+      <h2 className="text-2xl font-[620] leading-tight text-portfolio-ink">{section.title}</h2>
       <p className={`mt-4 ${bodyText}`}>{section.intro}</p>
       <div className={`${cardSurface} mt-5 overflow-hidden`}>
-        <div className="grid grid-cols-2 border-b border-white/10 bg-slate-950/50">
-          <div className={`${metadataLabel} p-3 sm:p-4`}>Transaction A</div>
-          <div className={`${metadataLabel} border-l border-white/10 p-3 sm:p-4`}>
+        <div className="grid grid-cols-2 border-b border-portfolio-border bg-portfolio-atmosphere">
+          <div className={`${lightMetadataLabel} p-3 sm:p-4`}>Transaction A</div>
+          <div className={`${lightMetadataLabel} border-l border-portfolio-border p-3 sm:p-4`}>
             Transaction B
           </div>
         </div>
-        <div className="divide-y divide-white/10">
+        <div className="divide-y divide-portfolio-border">
           {section.rows.map(([left, right], index) => (
             <div className="grid grid-cols-2" key={`${left}-${right}-${index}`}>
-              <div className="min-h-12 break-words p-3 font-mono text-sm leading-6 text-slate-100 sm:p-4">
+              <div className="min-h-12 break-words p-3 font-mono text-sm leading-6 text-slate-800 sm:p-4">
                 {left}
               </div>
-              <div className="min-h-12 break-words border-l border-white/10 p-3 font-mono text-sm leading-6 text-slate-100 sm:p-4">
+              <div className="min-h-12 break-words border-l border-portfolio-border p-3 font-mono text-sm leading-6 text-slate-800 sm:p-4">
                 {right}
               </div>
             </div>
@@ -107,12 +108,12 @@ function SequenceSection({ section }: { section: Extract<ArticleSection, { kind:
 function ListSection({ section }: { section: Extract<ArticleSection, { kind: "list" }> }) {
   return (
     <section className="py-7 sm:py-8">
-      <h2 className="text-2xl font-[620] leading-tight text-slate-50">{section.title}</h2>
+      <h2 className="text-2xl font-[620] leading-tight text-portfolio-ink">{section.title}</h2>
       {section.intro ? <p className={`mt-4 ${bodyText}`}>{section.intro}</p> : null}
       <ul className="mt-4 space-y-3">
         {section.items.map((item) => (
-          <li className="flex gap-3 text-base leading-7 text-slate-200/90" key={item}>
-            <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-300" />
+          <li className="flex gap-3 text-base leading-7 text-portfolio-body" key={item}>
+            <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-portfolio-accent" />
             <span>{item}</span>
           </li>
         ))}
@@ -142,49 +143,51 @@ export default async function WritingPage({ params }: WritingPageProps) {
   }
 
   return (
-    <main className="font-sans">
-      <section className="border-b border-white/10 bg-[linear-gradient(180deg,rgba(11,16,32,0.92),rgba(7,10,18,1))]">
-        <div className={`${pageShell} py-14 sm:py-16 lg:py-20`}>
-          <LinkButton href="/writing" variant="tertiary">
-            ← Engineering Notes
-          </LinkButton>
-          <Link
-            className="ml-1 inline-flex min-h-11 items-center justify-center rounded-md border border-transparent bg-transparent px-4 py-2 text-sm font-[600] leading-[1.35] text-slate-300 transition hover:bg-white/[0.04] hover:text-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-300"
-            href="/"
-          >
-            Portfolio
-          </Link>
-          <p className={`mt-8 ${metadataLabel}`}>Engineering Note</p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-normal text-white sm:text-5xl">
+    <main className="bg-white font-sans text-portfolio-ink">
+      <section className="border-b border-portfolio-border bg-[radial-gradient(circle_at_top_right,rgba(23,105,255,0.1),transparent_34%),linear-gradient(180deg,#ffffff,#f7fbff)]">
+        <div className={`${pageShell} py-8 sm:py-10 lg:py-12`}>
+          <div className="flex flex-wrap items-center gap-2">
+            <LinkButton href="/writing" variant="tertiary">
+              ← Engineering Notes
+            </LinkButton>
+            <Link
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-transparent bg-transparent px-4 py-2 text-sm font-[600] leading-[1.35] text-portfolio-accent transition hover:bg-portfolio-atmosphere hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent"
+              href="/"
+            >
+              Portfolio
+            </Link>
+          </div>
+          <p className={`mt-8 ${lightMetadataLabel}`}>Engineering Note</p>
+          <h1 className="mt-3 text-4xl font-[720] leading-tight tracking-normal text-[#050b2d] sm:text-5xl">
             {article.title}
           </h1>
-          <p className="mt-5 text-lg leading-8 text-slate-200/90 sm:text-xl sm:leading-9">
+          <p className="mt-4 text-base leading-7 text-portfolio-body sm:text-lg sm:leading-8">
             {article.subtitle}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <span className={`${mutedLabel} rounded-md border border-slate-500/35 px-2.5 py-1.5`}>
+            <span className={`${lightMutedLabel} rounded-md border border-portfolio-border bg-white px-2.5 py-1.5`}>
               {article.readingTime}
             </span>
-            <span className={`${mutedLabel} rounded-md border border-slate-500/35 px-2.5 py-1.5`}>
+            <span className={`${lightMutedLabel} rounded-md border border-portfolio-border bg-white px-2.5 py-1.5`}>
               {article.project}
             </span>
           </div>
         </div>
       </section>
 
-      <article className={`${pageShell} py-8 sm:py-10`}>
+      <article className={`${pageShell} py-8 text-portfolio-body sm:py-10`}>
         {article.sections.map((section) => (
           <ArticleSectionView section={section} key={section.title} />
         ))}
 
         <div className={`${cardSurface} mt-8 p-4 sm:p-5`}>
-          <p className={metadataLabel}>Related evidence</p>
+          <p className={lightMetadataLabel}>Related evidence</p>
           <div className="mt-4 flex flex-wrap gap-3">
             <LinkButton href={article.caseStudyHref} variant="primary">
               View Case Study
             </LinkButton>
             <Link
-              className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-500/35 bg-white/[0.03] px-4 py-2 text-sm font-[600] leading-[1.35] text-slate-100 transition hover:border-slate-300/70 hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-300"
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-portfolio-border bg-white px-4 py-2 text-sm font-[600] leading-[1.35] text-portfolio-ink transition hover:border-portfolio-accent hover:bg-portfolio-atmosphere focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent"
               href={article.sourceHref}
               target="_blank"
               rel="noopener noreferrer"

@@ -1,29 +1,23 @@
+import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import {
   AboutSection,
-  ContactSection,
-  EducationSection,
-  EvidenceAtGlanceSection,
-  ExperienceSection,
-  ExpertiseSection,
-  FeaturedEngineeringSection,
-  RecognitionSection,
-  WritingSection
+  CapabilityStrip,
+  CareerSummarySection,
+  Footer,
+  FeaturedEngineeringSection
 } from "@/components/HomeSections";
 
 export default function Home() {
   return (
-    <main>
+    <main className="min-h-screen bg-portfolio-bg text-portfolio-ink">
+      <Header />
       <Hero />
+      <CapabilityStrip />
       <AboutSection />
       <FeaturedEngineeringSection />
-      <EvidenceAtGlanceSection />
-      <WritingSection />
-      <ExpertiseSection />
-      <ExperienceSection />
-      <RecognitionSection />
-      <EducationSection />
-      <ContactSection />
+      <CareerSummarySection />
+      <Footer />
     </main>
   );
 }

@@ -5,6 +5,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        portfolio: {
+          bg: "#ffffff",
+          surface: "#f7f9fc",
+          atmosphere: "#eff5ff",
+          ink: "#071126",
+          body: "#34445e",
+          muted: "#687792",
+          accent: "#1769ff",
+          border: "#d7e1ef",
+          navy: "#071126"
+        },
         ink: {
           950: "#070a12",
           900: "#0b1020",

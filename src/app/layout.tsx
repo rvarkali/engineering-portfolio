@@ -9,9 +9,9 @@ const inter = Inter({
   variable: "--font-inter"
 });
 
-const title = "Ravinder Varkali | Senior Staff / Principal Software Engineer";
+const title = "Ravinder Varkali — Senior Staff / Principal Software Engineer";
 const description =
-  "Personal engineering portfolio focused on distributed systems, cloud platforms, platform engineering, applied AI, observability, reliability, security, and technical leadership.";
+  "Engineering portfolio focused on distributed systems, cloud platforms, backend architecture, applied AI, observability, reliability, security, and technical leadership.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -44,6 +44,11 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true
+  },
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg"
   }
 };
 
@@ -69,7 +74,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
   return (
     <html lang="en" className="scroll-smooth">
-      <body className={`${inter.variable} bg-ink-950 font-sans text-slate-100 antialiased`}>
+      <body className={`${inter.variable} bg-portfolio-bg font-sans text-portfolio-ink antialiased`}>
         {children}
         <script
           type="application/ld+json"

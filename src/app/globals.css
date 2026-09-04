@@ -3,7 +3,15 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+  --portfolio-bg: #ffffff;
+  --portfolio-surface: #f7f9fc;
+  --portfolio-atmosphere: #eff5ff;
+  --portfolio-ink: #071126;
+  --portfolio-body: #34445e;
+  --portfolio-muted: #687792;
+  --portfolio-accent: #1769ff;
+  --portfolio-border: #d7e1ef;
 }
 
 * {
@@ -11,15 +19,16 @@
 }
 
 html {
-  background: #070a12;
+  background: var(--portfolio-bg);
 }
 
 body {
   min-height: 100vh;
+  color: var(--portfolio-ink);
 }
 
 ::selection {
-  background: rgba(96, 165, 250, 0.35);
+  background: rgba(23, 105, 255, 0.2);
 }
 
 @media (prefers-reduced-motion: reduce) {

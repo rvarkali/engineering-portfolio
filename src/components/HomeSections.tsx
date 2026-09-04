@@ -1,473 +1,372 @@
-import { credentials, expertiseGroups, profile, recognition } from "@/data/profile";
+import Link from "next/link";
+import { profile, recognition } from "@/data/profile";
 import { experienceHighlights } from "@/data/experience";
 import { featuredProjects } from "@/data/projects";
-import { articles } from "@/data/writing";
 import { LinkButton } from "./LinkButton";
+import { ProjectCard } from "./ProjectCard";
 import { Section } from "./Section";
 
-const cardSurface = "rounded-lg border border-white/[0.12] bg-white/[0.04] shadow-soft-border";
-const emphasizedCardSurface = "border-blue-300/30 bg-blue-300/[0.06]";
-const cardTitle = "text-base font-[620] leading-snug text-slate-50 sm:text-lg";
-const cardBody = "text-sm leading-6 text-slate-300 sm:text-base sm:leading-7";
-const metadataLabel =
-  "text-xs font-semibold uppercase tracking-[0.16em] text-blue-200 sm:text-sm";
-const mutedLabel = "text-xs font-semibold uppercase tracking-[0.16em] text-slate-400";
+const eyebrow = "text-xs font-semibold uppercase tracking-[0.18em] text-portfolio-accent";
 const chip =
-  "rounded-md border border-slate-500/45 bg-slate-900/70 px-2 py-1 text-sm font-medium leading-[1.35] text-slate-200 sm:px-2.5 sm:py-1.5 sm:text-[15px] sm:leading-[1.4]";
-const codeChip =
-  "rounded-md border border-violet-300/25 bg-violet-300/[0.1] px-2 py-1 font-mono text-[13px] font-medium leading-[1.35] text-violet-100 sm:px-2.5 sm:py-1.5 sm:text-sm sm:leading-[1.4]";
+  "rounded-md border border-[#cfe0f5] bg-[#eef5ff] px-2.5 py-1.5 text-xs font-medium leading-tight text-portfolio-body";
 
-export function AboutSection() {
+type IconType =
+  | "systems"
+  | "cloud"
+  | "ai"
+  | "chart"
+  | "lock"
+  | "briefcase"
+  | "award"
+  | "education"
+  | "cert";
+
+function LineIcon({ type }: { type: IconType }) {
+  const common = "h-7 w-7 text-portfolio-accent";
+
+  if (type === "cloud") {
+    return (
+      <svg aria-hidden="true" className={common} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M7 18h10.25a4.25 4.25 0 0 0 .57-8.46 6 6 0 0 0-11.37-1.7A4.8 4.8 0 0 0 7 18Z" />
+      </svg>
+    );
+  }
+
+  if (type === "ai") {
+    return (
+      <svg aria-hidden="true" className={common} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 3v3m6-3v3M9 18v3m6-3v3M3 9h3m-3 6h3m12-6h3m-3 6h3M8 8h8v8H8z" />
+      </svg>
+    );
+  }
+
+  if (type === "chart") {
+    return (
+      <svg aria-hidden="true" className={common} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4 19V5m0 14h17M8 16V9m5 7V6m5 10v-4" />
+      </svg>
+    );
+  }
+
+  if (type === "lock") {
+    return (
+      <svg aria-hidden="true" className={common} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M7 10V8a5 5 0 0 1 10 0v2m-9 0h8a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2Z" />
+      </svg>
+    );
+  }
+
+  if (type === "briefcase" || type === "cert") {
+    return (
+      <svg aria-hidden="true" className={common} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m-9 0h8a4 4 0 0 1 4 4v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-6a4 4 0 0 1 4-4Z" />
+      </svg>
+    );
+  }
+
+  if (type === "award") {
+    return (
+      <svg aria-hidden="true" className={common} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 21h8m-4-4v4m-6-18h12v5a6 6 0 0 1-12 0V3Zm0 3H4a4 4 0 0 0 4 4m10-4h2a4 4 0 0 1-4 4" />
+      </svg>
+    );
+  }
+
+  if (type === "education") {
+    return (
+      <svg aria-hidden="true" className={common} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+        <path strokeLinecap="round" strokeLinejoin="round" d="m3 8.5 9-4.5 9 4.5-9 4.5-9-4.5Zm4 2.2V16c1.4 1.5 3.1 2.2 5 2.2s3.6-.7 5-2.2v-5.3" />
+      </svg>
+    );
+  }
+
   return (
-    <Section id="about" eyebrow="About" title="Technical leadership for distributed platforms.">
-      <div className={`${cardSurface} p-4 sm:p-6`}>
-        <p className="text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
-          {profile.about}
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4">
-          <span className={mutedLabel}>Primary languages</span>
-          {profile.languages.map((language) => (
-            <span className={chip} key={language}>
-              {language}
-            </span>
-          ))}
-        </div>
-      </div>
-    </Section>
+    <svg aria-hidden="true" className={common} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 5h14v4H5zM5 15h14v4H5zM8 9v6m8-6v6" />
+    </svg>
   );
 }
+export function CapabilityStrip() {
+  const capabilities = [
+    ["systems", "Distributed Systems", "Design for scale and resilience"],
+    ["cloud", "Cloud Platforms", "AWS, GCP, Kubernetes"],
+    ["ai", "Applied AI", "Practical, production-ready"],
+    ["chart", "Observability", "Metrics, tracing, reliability"],
+    ["lock", "Security", "Zero trust, least privilege"]
+  ] as const;
 
-export function ExpertiseSection() {
   return (
-    <Section
-      id="technical-expertise"
-      eyebrow="Technical Expertise"
-      title="Core engineering strengths."
-    >
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {expertiseGroups.map((group) => (
-          <article
-            className={`${cardSurface} p-4 sm:p-5 ${
-              group.title === "Distributed Systems" ||
-              group.title === "Applied AI & AI Infrastructure"
-                ? emphasizedCardSurface
-                : ""
-            } ${group.title === "Technical Leadership" ? "md:col-span-2 xl:col-span-3" : ""}`}
-            key={group.title}
-          >
-            <h3 className={cardTitle}>{group.title}</h3>
-            <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
-              {group.items.map((item) => (
-                <span className={chip} key={item}>
-                  {item}
-                </span>
-              ))}
-            </div>
-          </article>
+    <section aria-label="Engineering capabilities" className="border-b border-t border-portfolio-border bg-white">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 px-5 sm:grid-cols-2 sm:px-8 lg:grid-cols-5">
+        {capabilities.map(([icon, title, description]) => (
+          <div className="border-portfolio-border py-5 sm:px-5 lg:border-l lg:first:border-l-0" key={title}>
+            <LineIcon type={icon} />
+            <h2 className="mt-2.5 text-base font-semibold leading-tight text-portfolio-ink">{title}</h2>
+            <p className="mt-1 text-sm leading-6 text-portfolio-muted">{description}</p>
+          </div>
         ))}
       </div>
-    </Section>
+    </section>
   );
 }
 
-function ArchitectureVisualization() {
-  const clientNodes = ["AI Client", "Engineering Client"];
-  const crossCutting = ["Authentication / RBAC", "OpenTelemetry", "Reliability Controls"];
+export function AboutSection() {
+  const metrics = [
+    ["500K+", "Nodes Managed", "(at peak)"],
+    ["Millions", "Users / Requests", "(at peak)"],
+    ["Global", "Cloud & Enterprise", "Environments"],
+    ["Real Impact", "From infrastructure", "to customer outcomes"]
+  ];
 
   return (
-    <div className={`${cardSurface} bg-ink-950/50 p-4 sm:p-5`}>
-      <div className="flex flex-col items-center text-center">
-        <div className="w-full rounded-md border border-blue-200/25 bg-blue-200/[0.06] p-3">
-          <p className={`mb-2 ${metadataLabel}`}>Clients</p>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {clientNodes.map((node) => (
-              <div
-                className="rounded-md border border-slate-500/45 bg-slate-900/70 px-3 py-2.5 text-sm font-medium leading-[1.35] text-slate-100"
-                key={node}
-              >
-                {node}
+    <section id="about" className="scroll-mt-24 bg-portfolio-surface pt-7 pb-4 sm:pt-9 sm:pb-5 lg:pt-10 lg:pb-5">
+      <div className="mx-auto grid max-w-7xl gap-6 px-5 sm:px-8 lg:grid-cols-[1fr_0.46fr] lg:items-start">
+        <div>
+          <div className="max-w-3xl">
+            <p className={eyebrow}>About</p>
+            <h2 className="mt-3 text-[2rem] font-bold leading-[1.1] tracking-[-0.025em] text-portfolio-ink sm:text-[2.45rem]">
+              Technical leadership for distributed platforms.
+            </h2>
+          </div>
+          <p className="mt-2.5 max-w-4xl text-lg font-normal leading-8 text-portfolio-body sm:mt-3">
+            I architect and build distributed backend systems, cloud-native platforms, and secure
+            AI-enabled infrastructure. I&apos;m passionate about building reliable systems,
+            enabling teams, and solving complex problems that have a real impact on customers and
+            businesses.
+          </p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {metrics.map(([value, label, detail]) => (
+              <div className="border-l border-portfolio-border pl-4" key={value}>
+                <p className="text-[1.45rem] font-bold leading-tight tracking-[-0.025em] text-portfolio-accent">
+                  {value}
+                </p>
+                <p className="mt-2 text-sm font-semibold leading-tight text-portfolio-ink">{label}</p>
+                <p className="mt-1 text-sm leading-5 text-portfolio-muted">{detail}</p>
               </div>
             ))}
           </div>
         </div>
-        <div className="h-6 w-px bg-blue-200/30" />
-        <div className="rounded-md border border-slate-500/45 bg-slate-900/70 px-5 py-3 text-sm font-medium leading-[1.35] text-slate-100">
-          MCP
-        </div>
-        <div className="h-6 w-px bg-violet-200/30" />
-        <div className="rounded-md border border-slate-500/45 bg-slate-900/70 px-5 py-3 text-sm font-medium leading-[1.35] text-slate-100">
-          MCP Integration Layer
-        </div>
-        <div className="h-6 w-px bg-slate-400/30" />
-        <div className="rounded-md border border-slate-500/45 bg-slate-900/70 px-5 py-3 text-sm font-medium leading-[1.35] text-slate-100">
-          gRPC
-        </div>
-        <div className="grid w-full items-start gap-2 pt-4 sm:grid-cols-[1fr_auto_1fr] sm:gap-3 sm:pt-5">
-          <div className="rounded-md border border-slate-500/45 bg-slate-900/70 px-3 py-3 sm:px-4 sm:py-4">
-            <p className="text-sm font-medium leading-[1.35] text-slate-100">Catalog Service</p>
-          </div>
-          <div className="hidden h-full min-h-12 w-px bg-slate-500/25 sm:block" />
-          <div className="rounded-md border border-slate-500/45 bg-slate-900/70 px-3 py-3 sm:px-4 sm:py-4">
-            <p className="text-sm font-medium leading-[1.35] text-slate-100">Diagnostic Service</p>
-          </div>
-        </div>
-        <div className="h-6 w-px bg-slate-400/30" />
-        <div className="rounded-md border border-amber-200/30 bg-amber-200/[0.11] px-5 py-3 text-sm font-medium leading-[1.35] text-amber-100">
-          PostgreSQL
-        </div>
-      </div>
-      <div className="mt-5 border-t border-white/10 pt-4">
-        <p className={mutedLabel}>Cross-cutting controls</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {crossCutting.map((item) => (
-            <span className={chip} key={item}>
-              {item}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AgentTrustFlow({ steps }: { steps: string[] }) {
-  return (
-    <div
-      aria-label="AgentTrust authorization flow: Start Run, Scoped JWT, Authorize Scope, Allow or Deny, Audit Decision, Execute if Allowed"
-      className="rounded-lg border border-slate-500/30 bg-ink-950/45 p-3 sm:p-4"
-    >
-      <div className="flex flex-col items-center gap-1.5">
-        {steps.map((step, index) => (
-          <div className="flex w-full flex-col items-center gap-1.5" key={step}>
-            <div className="flex min-h-10 w-full max-w-64 items-center justify-center rounded-md border border-slate-500/40 bg-slate-900/70 px-3 py-2 text-center text-sm font-medium leading-[1.25] text-slate-100 sm:max-w-72">
-              {step}
+        <aside className="rounded-lg border border-portfolio-border bg-[linear-gradient(180deg,#ffffff,#f8fbff)] p-6 shadow-[0_10px_28px_rgba(7,17,38,0.04)] lg:mt-8">
+          <blockquote className="mt-1 text-base font-normal italic leading-7 text-portfolio-body">
+            “Great systems aren&apos;t just about technology. They&apos;re about people, clear
+            abstractions, and the discipline to make the right trade-offs.”
+          </blockquote>
+          <p className="mt-4 text-sm font-semibold text-portfolio-ink">— Ravinder Varkali</p>
+          <div className="mt-6 border-t border-portfolio-border pt-5">
+            <p className={eyebrow}>Primary Languages</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {[...profile.languages, "Python"].map((language) => (
+                <span className={chip} key={language}>
+                  {language}
+                </span>
+              ))}
             </div>
-            {index < steps.length - 1 ? (
-              <span
-                aria-hidden="true"
-                className="text-sm font-semibold leading-none text-blue-200/70"
-              >
-                ↓
-              </span>
-            ) : null}
           </div>
-        ))}
+        </aside>
       </div>
-    </div>
+    </section>
   );
 }
 
 export function FeaturedEngineeringSection() {
-  const [cloudOpsProject, agentTrustProject] = featuredProjects;
+  const [grpcProject, agentTrustProject] = featuredProjects;
+  const projects = [
+    {
+      title: grpcProject.title,
+      category: "Distributed Systems",
+      description:
+        "End-to-end reference implementation demonstrating secure, observable, production-grade microservices using Go and gRPC.",
+      technologies: ["Go", "gRPC", "PostgreSQL", "OpenTelemetry"],
+      href: grpcProject.caseStudyHref ?? "/projects/grpc-microservices-reference",
+      githubHref: grpcProject.href,
+      image: {
+        src: "/images/projects/grpc-microservices.png",
+        alt: "Isometric illustration of clients communicating with gRPC services, service-owned PostgreSQL databases, and OpenTelemetry."
+      },
+      lightboxTitle: "gRPC Microservices Reference Architecture Overview"
+    },
+    {
+      title: "AgentTrust SDK",
+      category: "Applied AI",
+      description:
+        "Open-source SDK for least-privilege identity, tool authorization, and audit for AI agents, with MCP and LangChain integration.",
+      technologies: ["Python", "MCP", "JWT", "Audit"],
+      href: agentTrustProject?.caseStudyHref ?? "/projects/agenttrust",
+      githubHref: agentTrustProject?.href,
+      image: {
+        src: "/images/projects/agenttrust.png",
+        alt: "Isometric illustration of an AI agent using scoped identity and authorization before controlled tool execution and audit."
+      },
+      lightboxTitle: "AgentTrust SDK Identity, Authorization & Audit Architecture"
+    },
+    {
+      title: "Observability & Troubleshooting Platform",
+      category: "Platform Engineering",
+      description:
+        "Distributed observability and troubleshooting platform spanning scalable backend architecture, reliability engineering, secure service design, and technical leadership.",
+      technologies: ["Kubernetes", "Redis", "PostgreSQL", "OpenTelemetry"],
+      href: "/projects/observability-troubleshooting-platform",
+      ctaLabel: "View Experience →",
+      image: {
+        src: "/images/projects/observability-platform.png",
+        alt: "Isometric illustration of distributed agents, a control plane, data services, observability pipeline, and troubleshooting dashboard."
+      },
+      lightboxTitle:
+        "Observability & Troubleshooting Platform Distributed Observability Architecture"
+    }
+  ];
 
   return (
     <Section
       id="featured-engineering"
       eyebrow="Featured Engineering"
-      title="Distributed platform reference architecture."
-      description="The primary portfolio artifact remains a public distributed systems reference architecture, with a second SDK project showing applied AI security and framework integration."
+      title="Selected projects and case studies."
+      className="bg-white"
+      contentClassName="mt-6 sm:mt-7"
+      paddingClassName="pt-8 pb-8 sm:pt-10 sm:pb-10 lg:pt-8 lg:pb-10"
     >
-      <article className="rounded-lg border border-blue-300/30 bg-[linear-gradient(180deg,rgba(96,165,250,0.09),rgba(255,255,255,0.04))] p-4 shadow-soft-border sm:p-7 lg:p-8">
-        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start lg:gap-8">
-          <div>
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className={metadataLabel}>{cloudOpsProject.status}</p>
-                <h3 className="mt-3 text-2xl font-[620] leading-tight text-slate-50 sm:text-3xl">
-                  {cloudOpsProject.title}
-                </h3>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {cloudOpsProject.caseStudyHref ? (
-                  <LinkButton href={cloudOpsProject.caseStudyHref} variant="primary">
-                    View Case Study →
-                  </LinkButton>
-                ) : null}
-                <LinkButton href={cloudOpsProject.href} newTab>
-                  View Source →
-                </LinkButton>
-              </div>
-            </div>
-            <p className="mt-4 text-base leading-7 text-slate-300 sm:mt-5 sm:leading-8">
-              {cloudOpsProject.description}
-            </p>
-            <div className="mt-5 flex flex-wrap gap-1.5 sm:mt-6 sm:gap-2">
-              {cloudOpsProject.highlights.map((highlight) => (
-                <span className={chip} key={highlight}>
-                  {highlight}
-                </span>
-              ))}
-            </div>
-            <div className="mt-6 border-t border-white/10 pt-4 sm:mt-7 sm:pt-5">
-              <p className={metadataLabel}>AI integration</p>
-              <p className="mt-2 text-sm leading-6 text-slate-400 sm:mt-3 sm:leading-7">
-                MCP exposes selected diagnostic and service capabilities to AI clients.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
-                {cloudOpsProject.mcp?.map((tool) => (
-                  <code className={codeChip} key={tool}>
-                    {tool}
-                  </code>
-                ))}
-              </div>
-            </div>
-          </div>
-          <ArchitectureVisualization />
-        </div>
-      </article>
-      {agentTrustProject ? (
-        <article className={`${cardSurface} mt-4 p-4 sm:mt-5 sm:p-6 lg:p-7`}>
-          <div className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-7">
-            <div>
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <p className={metadataLabel}>{agentTrustProject.status}</p>
-                  <h3 className="mt-3 text-xl font-[620] leading-tight text-slate-50 sm:text-2xl">
-                    {agentTrustProject.title}
-                  </h3>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {agentTrustProject.caseStudyHref ? (
-                    <LinkButton href={agentTrustProject.caseStudyHref} variant="primary">
-                      View Case Study →
-                    </LinkButton>
-                  ) : null}
-                  <LinkButton href={agentTrustProject.href} newTab>
-                    View Source →
-                  </LinkButton>
-                </div>
-              </div>
-              <p className="mt-4 text-sm leading-6 text-slate-300 sm:text-base sm:leading-7">
-                {agentTrustProject.description}
-              </p>
-              <div className="mt-4 flex flex-wrap gap-1.5 sm:gap-2">
-                {agentTrustProject.highlights.map((highlight) => (
-                  <span className={chip} key={highlight}>
-                    {highlight}
-                  </span>
-                ))}
-              </div>
-              <p className="mt-5 border-t border-white/10 pt-4 text-sm leading-6 text-slate-400">
-                <span className="font-semibold text-slate-300">MVP boundary:</span>{" "}
-                {agentTrustProject.boundary}
-              </p>
-            </div>
-            {agentTrustProject.trustFlow ? (
-              <div className="flex flex-col justify-center">
-                <p className={metadataLabel}>Authorization flow</p>
-                <div className="mt-3">
-                  <AgentTrustFlow steps={agentTrustProject.trustFlow} />
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </article>
-      ) : null}
-    </Section>
-  );
-}
-
-const evidenceItems = [
-  {
-    category: "Concurrent correctness",
-    title: "Concurrent workflow admission",
-    project: "gRPC Microservices Reference",
-    proof:
-      "A controlled local PostgreSQL-backed experiment sent 20 equivalent Diagnostic requests with one idempotency key across five runs. Each run converged on 1 durable job, 1 idempotency record, and 1 job-created outbox event.",
-    boundary:
-      "Local correctness evidence, not a throughput, scale, latency, or production-reliability benchmark.",
-    href: "/projects/grpc-microservices-reference"
-  },
-  {
-    category: "Distributed observability",
-    title: "Joined runtime trace",
-    project: "gRPC Microservices Reference",
-    proof:
-      "Local runtime evidence shows one OpenTelemetry trace across Diagnostic service, Catalog gRPC client, Catalog service, and PostgreSQL repository work. Dependency-failure behavior was captured in the same evidence set.",
-    boundary: "This does not claim production observability, SLO validation, or availability.",
-    href: "/projects/grpc-microservices-reference"
-  },
-  {
-    category: "AI authorization boundary",
-    title: "Denied before tool execution",
-    project: "AgentTrust",
-    proof:
-      "Within AgentTrust's guarded cooperative execution boundary, service.read reached the underlying tool path once; service.restart without scope was denied before invocation, with denied invocation count 0.",
-    boundary: "This does not imply process isolation or protection from raw client/tool bypass.",
-    href: "/projects/agenttrust"
-  }
-];
-
-export function EvidenceAtGlanceSection() {
-  return (
-    <Section
-      id="evidence-at-a-glance"
-      eyebrow="Evidence at a Glance"
-      title="Engineering claims backed by runtime evidence."
-    >
-      <div className="grid gap-4 lg:grid-cols-3">
-        {evidenceItems.map((item) => (
-          <article className={`${cardSurface} flex flex-col p-4 sm:p-5`} key={item.title}>
-            <p className={metadataLabel}>{item.category}</p>
-            <h3 className="mt-3 text-lg font-[620] leading-snug text-slate-50">
-              {item.title}
-            </h3>
-            <p className="mt-3 text-sm leading-6 text-slate-300">{item.proof}</p>
-            <p className="mt-3 text-sm leading-6 text-slate-400">{item.boundary}</p>
-            <div className="mt-4 flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className={mutedLabel}>{item.project}</p>
-              <LinkButton href={item.href} variant="primary">
-                View Case Study →
-              </LinkButton>
-            </div>
-          </article>
+      <div className="-mt-14 flex justify-end pb-5 sm:-mt-16">
+        <LinkButton href={profile.github} variant="tertiary" newTab>
+          View all projects →
+        </LinkButton>
+      </div>
+      <div className="grid items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {projects.map((project) => (
+          <ProjectCard {...project} key={project.title} />
         ))}
       </div>
     </Section>
   );
 }
 
-export function WritingSection() {
-  const [article] = articles;
-
-  if (!article) {
-    return null;
-  }
+export function CareerSummarySection() {
+  const companies = ["Zscaler", "VMware", "Asurion", "Apple/Wipro", "IBM"];
+  const education = ["M.Tech, IIT Madras", "B.Tech, Osmania University"];
+  const certifications = [
+    "AWS Certified Solutions Architect — Associate",
+    "Zscaler Zero Trust Cyber Associate (ZTCA)",
+    "Deep Learning Specialization — DeepLearning.AI"
+  ];
+  const summaries = [
+    { icon: "briefcase" as const, title: "Experience", items: companies },
+    { icon: "award" as const, title: "Recognition", items: recognition },
+    { icon: "education" as const, title: "Education", items: education },
+    { icon: "cert" as const, title: "Certifications", items: certifications }
+  ];
 
   return (
-    <Section
-      id="writing"
-      eyebrow="Writing / Engineering Notes"
-      title="Short technical notes from implemented systems."
-    >
-      <article className={`${cardSurface} p-4 sm:p-5`}>
-        <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+    <section className="border-y border-portfolio-border bg-portfolio-surface pb-12 pt-12 sm:pb-14 sm:pt-14 lg:pb-12 lg:pt-12">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className={metadataLabel}>{article.readingTime}</p>
-            <h3 className="mt-3 text-xl font-[620] leading-tight text-slate-50 sm:text-2xl">
-              {article.title}
-            </h3>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300 sm:text-base sm:leading-7">
-              {article.description}
-            </p>
+            <p className={eyebrow}>Experience & Credentials</p>
+            <h2 className="mt-3 text-[2rem] font-bold leading-[1.1] tracking-[-0.025em] text-portfolio-ink sm:text-[2.45rem]">
+              Engineering experience built across systems at scale.
+            </h2>
           </div>
-          <LinkButton href={`/writing/${article.slug}`} variant="primary">
-            Read Note →
+          <LinkButton href={profile.resume} variant="tertiary" newTab>
+            View Resume →
           </LinkButton>
         </div>
-      </article>
-    </Section>
-  );
-}
-
-export function ExperienceSection() {
-  return (
-    <Section
-      id="experience"
-      eyebrow="Experience Highlights"
-      title="Engineering experience at scale."
-      description="Selected platform, distributed systems, and architecture work across cloud and enterprise environments."
-    >
-      <div className="grid gap-4 md:grid-cols-2">
-        {experienceHighlights.map((item, index) => (
-          <article
-            className={`${cardSurface} p-4 sm:p-5 ${
-              index === experienceHighlights.length - 1 ? "md:col-span-2" : ""
-            }`}
-            key={item.company}
-          >
-            <h3 className={cardTitle}>{item.company}</h3>
-            <p className={`mt-1 ${metadataLabel}`}>{item.role}</p>
-            <p className={`mt-3 ${cardBody}`}>{item.focus}</p>
-          </article>
-        ))}
-      </div>
-    </Section>
-  );
-}
-
-export function RecognitionSection() {
-  return (
-    <Section id="recognition" eyebrow="Recognition" title="Selected recognition.">
-      <div className="grid gap-4 md:grid-cols-3">
-        {recognition.map((item) => (
-          <div
-            className={`${cardSurface} p-4 text-sm font-[620] leading-snug text-slate-100 sm:p-5 sm:text-base`}
-            key={item}
-          >
-            {item}
-          </div>
-        ))}
-      </div>
-    </Section>
-  );
-}
-
-export function EducationSection() {
-  return (
-    <Section
-      id="education"
-      eyebrow="Education & Certifications"
-      title="Education and certifications."
-    >
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className={`${cardSurface} bg-ink-800/70 p-4 sm:p-5`}>
-          <h3 className={metadataLabel}>Education</h3>
-          <div className="mt-3 space-y-3">
-            {credentials.education.map((item) => (
-              <p className={cardBody} key={item}>
-                {item}
-              </p>
-            ))}
-          </div>
-        </div>
-        <div className={`${cardSurface} bg-ink-800/70 p-4 sm:p-5`}>
-          <h3 className={metadataLabel}>Certifications</h3>
-          <div className="mt-3 space-y-3">
-            {credentials.certifications.map((item) => (
-              <p className={cardBody} key={item}>
-                {item}
-              </p>
-            ))}
-          </div>
+        <div className="mt-8 grid gap-y-7 sm:grid-cols-2 lg:grid-cols-[0.95fr_1.05fr_0.95fr_1.25fr]">
+          {summaries.map((summary, index) => (
+            <div
+              className={`border-portfolio-border pt-7 first:pt-0 sm:pt-0 ${
+                index > 0 ? "border-t sm:border-t-0" : ""
+              } ${
+                index % 2 === 0
+                  ? "sm:border-r sm:pr-6"
+                  : "sm:pl-6"
+              } lg:border-r lg:px-6 lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0`}
+              key={summary.title}
+            >
+              <LineIcon type={summary.icon} />
+              <h3 className="mt-3 text-base font-semibold uppercase leading-tight text-portfolio-ink">
+                {summary.title}
+              </h3>
+              <div className="mt-3 space-y-2 text-sm leading-6 text-portfolio-body">
+                {summary.items.map((item) => (
+                  <p key={item}>{item}</p>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-    </Section>
+      <p className="sr-only">
+        {experienceHighlights.map((item) => `${item.company}: ${item.role}`).join("; ")}
+      </p>
+    </section>
   );
 }
 
-export function ContactSection() {
+export function Footer() {
+  const iconLinkClass =
+    "inline-flex size-9 items-center justify-center rounded-md text-[#B8C5D8] transition-colors hover:bg-white/5 hover:text-[#F8FAFC] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#60A5FA]";
+  const footerTextLinkClass =
+    "inline-flex min-h-9 items-center rounded-md px-2.5 text-[#B8C5D8] transition-colors hover:bg-white/5 hover:text-[#F8FAFC] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#60A5FA]";
+
   return (
-    <footer id="contact" className="border-t border-white/10 py-12 sm:py-14">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8">
-        <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+    <footer className="bg-portfolio-navy py-5 sm:py-6">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-300 sm:text-sm">
-              Contact
+            <p className="text-xl font-bold tracking-[-0.02em] text-[#F8FAFC]">
+              Ravinder <span className="text-[#93C5FD]">Varkali</span>
             </p>
-            <h2 className="mt-3 text-[2rem] font-[620] leading-tight text-slate-50 sm:text-3xl">
-              Professional links
-            </h2>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300 sm:leading-8">
-              For engineering leadership, architecture, platform, cloud, and applied AI
-              conversations.
+            <p className="mt-1 text-sm font-normal text-[#B8C5D8]">
+              Distributed Systems · Cloud Platforms · Applied AI
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <LinkButton href={profile.linkedin} variant="tertiary">
-              LinkedIn
-            </LinkButton>
-            <LinkButton href={profile.github}>GitHub</LinkButton>
-            <LinkButton href={`mailto:${profile.email}`} variant="tertiary">
-              Email
-            </LinkButton>
-            <LinkButton href={profile.resume} newTab>
+          <nav className="flex flex-wrap items-center gap-1.5 text-sm font-medium" aria-label="Footer links">
+            <Link
+              aria-label="LinkedIn profile"
+              className={iconLinkClass}
+              href={profile.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <svg aria-hidden="true" className="size-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20.45 20.45h-3.56v-5.58c0-1.33-.03-3.04-1.86-3.04-1.86 0-2.14 1.45-2.14 2.95v5.67H9.33V8.98h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.3ZM5.32 7.41a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12Zm1.78 13.04H3.54V8.98H7.1v11.47Z" />
+              </svg>
+            </Link>
+            <Link
+              aria-label="GitHub profile"
+              className={iconLinkClass}
+              href={profile.github}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <svg aria-hidden="true" className="size-5" fill="currentColor" viewBox="0 0 24 24">
+                <path
+                  clipRule="evenodd"
+                  d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.86 8.35 6.84 9.7.5.09.68-.22.68-.49v-1.9c-2.78.62-3.37-1.22-3.37-1.22-.45-1.18-1.11-1.49-1.11-1.49-.91-.64.07-.63.07-.63 1 .07 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.86.09-.66.35-1.12.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.35 9.35 0 0 1 12 6.99c.85 0 1.69.12 2.49.35 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9v2.74c0 .27.18.59.69.49A10.06 10.06 0 0 0 22 12.23C22 6.58 17.52 2 12 2Z"
+                  fillRule="evenodd"
+                />
+              </svg>
+            </Link>
+            <Link
+              aria-label="Email Ravinder Varkali"
+              className={iconLinkClass}
+              href={`mailto:${profile.email}`}
+            >
+              <svg aria-hidden="true" className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6.5h16v11H4z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="m5 8 7 5 7-5" />
+              </svg>
+            </Link>
+            <Link
+              className={footerTextLinkClass}
+              href={profile.resume}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               Resume
-            </LinkButton>
-          </div>
+            </Link>
+          </nav>
         </div>
-        <p className="mt-10 text-sm text-slate-500">
-          © {new Date().getFullYear()} {profile.name} · {profile.role}
+        <p className="mt-4 border-t border-[#2B3D57] pt-3 text-sm text-[#AFC0D8]">
+          © 2026 Ravinder Varkali. All rights reserved.
         </p>
       </div>
     </footer>
