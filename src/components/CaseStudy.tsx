@@ -903,22 +903,23 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
       </section>
 
       <LightSection id="system-architecture" eyebrow="System Architecture" title="End-to-end architecture for least-privilege agent tool execution." description="AgentTrust uses two complementary layers: the public SDK provides developer-facing, cooperative in-process controls, while the gateway provides an independently enforced authorization point before protected MCP execution.">
-        <figure className="rounded-lg border border-blue-100 bg-white shadow-[0_14px_42px_rgba(15,45,88,0.07)]">
-          <div className="overflow-x-auto">
-            <Image
-              src="/images/agenttrust/agenttrust-architecture-execution.png"
-              alt="AgentTrust system architecture and protected tool execution flow showing the AI application, public SDK, independent gateway authorization boundary, protected MCP tools, observability, and ALLOW versus DENY execution paths."
-              width={1536}
-              height={1024}
-              sizes="(min-width: 1152px) 1152px, 100vw"
-              className="h-auto w-full min-w-[720px] max-w-none md:min-w-0"
-              priority
-            />
-          </div>
-          <figcaption className="border-t border-blue-100 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
+        <div>
+          <DiagramLightboxButton
+            asset={{
+              src: "/images/agenttrust/agenttrust-architecture-execution.png",
+              alt: "AgentTrust system architecture and protected tool execution flow showing the AI application, public SDK, independent gateway authorization boundary, protected MCP tools, observability, and ALLOW versus DENY execution paths.",
+              width: 1536,
+              height: 1024
+            }}
+            label="View architecture"
+            lightboxTitle="AgentTrust System Architecture and Tool Execution Flow"
+            priority
+            sizes="(min-width: 1152px) 1152px, 100vw"
+          />
+          <p className="mt-3 rounded-md border border-blue-100 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
             SDK-level cooperative controls are complemented by an independently enforced gateway that reaches protected MCP tools only after authorization.
-          </figcaption>
-        </figure>
+          </p>
+        </div>
         <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-600">
           Independent enforcement assumes deployment topology prevents untrusted agents from directly bypassing the gateway and reaching protected upstreams.
         </p>
