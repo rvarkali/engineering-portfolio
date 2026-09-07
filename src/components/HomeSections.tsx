@@ -186,18 +186,18 @@ export function FeaturedEngineeringSection() {
       lightboxTitle: "gRPC Microservices Reference Architecture Overview"
     },
     {
-      title: "AgentTrust SDK",
-      category: "Applied AI",
+      title: "AgentTrust",
+      category: "AI Security",
       description:
-        "Open-source SDK for least-privilege identity, tool authorization, and audit for AI agents, with MCP and LangChain integration.",
-      technologies: ["Python", "MCP", "JWT", "Audit"],
+        "Least-privilege identity and independently enforced tool authorization for AI agents, with scoped run identities, MCP enforcement, audit evidence, and observability.",
+      technologies: ["AI Security", "Go", "Python", "MCP", "OpenTelemetry"],
       href: agentTrustProject?.caseStudyHref ?? "/projects/agenttrust",
       githubHref: agentTrustProject?.href,
       image: {
         src: "/images/projects/agenttrust.png",
         alt: "Isometric illustration of an AI agent using scoped identity and authorization before controlled tool execution and audit."
       },
-      lightboxTitle: "AgentTrust SDK Identity, Authorization & Audit Architecture"
+      lightboxTitle: "AgentTrust Identity, Gateway Authorization & Audit Architecture"
     },
     {
       title: "Observability & Troubleshooting Platform",

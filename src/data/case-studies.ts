@@ -81,7 +81,7 @@ export type CaseStudy = {
     summary: string;
     components: string[];
     telemetry: string[];
-    diagram?: "grpc-services" | "agenttrust-boundary";
+    diagram?: "grpc-services";
     asset?: {
       src: string;
       alt: string;
@@ -510,16 +510,20 @@ export const caseStudies = [
   },
   {
     slug: "agenttrust",
-    title: "AgentTrust",
+    title: "AgentTrust — Least-Privilege Security for AI Agents",
     eyebrow: "AI Infrastructure Security",
     summary:
-      "Least-privilege identity and authorization for AI agent tool execution, implemented as an SDK-first guard for cooperative tool, MCP, and LangChain paths.",
+      "Identity, independently enforced authorization, MCP tool protection, audit evidence, and observability for AI-agent execution.",
     repositoryUrl: agentTrustRepositoryUrl,
     stack: [
       "Python",
+      "Go",
       "JWT",
+      "Ed25519",
       "MCP",
       "LangChain",
+      "OpenTelemetry",
+      "Prometheus",
       "Least Privilege",
       "Audit",
       "AI Infrastructure"
@@ -531,14 +535,14 @@ export const caseStudies = [
           "agent/run identity",
           "guarded tool execution",
           "LLM choice separated from authorization",
-          "explicit SDK trust boundary"
+          "explicit SDK and gateway trust boundaries"
         ]
       },
       {
         title: "Least Privilege",
         items: [
-          "short-lived scoped credentials",
-          "per-agent policy grants",
+          "short-lived scoped run identity",
+          "per-agent and per-tool grants",
           "deny-by-default unknown agents",
           "out-of-scope action rejection"
         ]
@@ -547,219 +551,205 @@ export const caseStudies = [
         title: "MCP And Tool Access",
         items: [
           "MCP tool-to-scope mapping",
-          "guarded-client enforcement",
-          "denied calls blocked before client invocation",
-          "raw-client bypass called out explicitly"
+          "trusted gateway routing",
+          "denied calls blocked before MCP invocation",
+          "raw-client bypass called out as topology risk"
         ]
       },
       {
-        title: "Auditability",
+        title: "Auditability And Observability",
         items: [
           "allow and deny audit records",
           "agent/run/tool/scope correlation",
-          "redacted argument capture",
-          "local JSONL audit sink"
+          "authorization vs execution lifecycle",
+          "traces and Prometheus-compatible metrics"
         ]
       }
     ],
     problem:
-      "LLM-driven applications may choose tools dynamically, but the host application must not treat a model-selected tool as an authorized action. AgentTrust explores the boundary between \"the model requested this\" and \"the application authorizes this\" with scoped per-run identity and guarded tool execution.",
+      "AI applications may hold access to powerful tools. AgentTrust explores the boundary between \"the model requested this\" and \"the application authorizes this\" with scoped run identity, deny-by-default authorization, audit evidence, and an independently enforced gateway path for protected MCP tools.",
     constraints: [
-      "AgentTrust is an SDK-level authorization layer for cooperative first-party code.",
-      "Authorization applies only when calls are routed through guarded AgentTrust APIs.",
-      "Raw tool, shell, database, or MCP client access remains outside the SDK enforcement boundary.",
-      "Policies grant explicit scope patterns per known agent.",
-      "The current audit sink is local JSONL, not immutable or tamper-evident storage.",
-      "The MVP avoids a gateway, control plane, enterprise IAM, and production-scale authorization service."
+      "The public SDK demonstrates cooperative in-process enforcement for first-party code.",
+      "The separately maintained gateway demonstrates independent authorization before configured MCP execution.",
+      "Strong gateway enforcement assumes deployment topology prevents direct upstream bypass.",
+      "Required scopes and MCP routing come from trusted configuration, not caller input.",
+      "The current audit sinks are local JSONL, not immutable or tamper-evident storage.",
+      "The initiative avoids production SaaS, multi-tenancy, enterprise IAM, dynamic policy management, and durable centralized audit claims."
     ],
     architecture: {
       summary:
-        "The host application starts an AgentTrust run, receives a scoped in-process run identity, routes tool or MCP calls through guarded adapters, and gets an allow-or-deny decision before execution. Audit records capture the decision and outcome for calls inside that path.",
-      diagram: "agenttrust-boundary",
-      asset: {
-        src: "/projects/agenttrust/system-architecture.png",
-        alt: "AgentTrust system architecture presentation diagram showing an AI agent or framework, AgentTrust SDK identity validation, authorization, tool execution, local audit logging, and supported adapters.",
-        width: 1536,
-        height: 1024
-      },
+        "AgentTrust has two complementary layers: a public SDK for cooperative in-process enforcement and a separately maintained gateway that independently verifies signed run identity, resolves trusted tool metadata, authorizes exact scopes, audits the decision, and invokes protected MCP tools only after ALLOW.",
       securityBoundaryPath: [
         "Host / Agent",
-        "AgentTrust guarded execution boundary",
-        "Guarded adapter",
-        "Tool / MCP client"
+        "AgentTrust SDK",
+        "AgentTrust Gateway",
+        "Protected MCP tool"
       ],
-      outsideBoundaryLabel: "Raw MCP client / raw tool reference",
+      outsideBoundaryLabel: "Direct upstream bypass",
       outsideBoundary:
-        "Code retaining a raw MCP session, raw client, or direct tool reference can bypass SDK-level enforcement.",
+        "Strong independent enforcement depends on deployment topology preventing agents from directly reaching protected upstreams.",
       components: [
         "LLM / Agent",
         "Host Application",
         "AgentTrust SDK",
-        "Policy configuration",
-        "Per-run identity",
-        "Guarded adapter",
-        "Tool / MCP client",
-        "Local JSONL audit sink"
+        "Signed run identity",
+        "Gateway verifier",
+        "Trusted tool registry",
+        "Exact-scope authorizer",
+        "Protected MCP tools",
+        "Audit and observability"
       ],
-      telemetry: ["Audit JSONL", "CLI audit viewer"]
+      telemetry: ["Structured logs", "OpenTelemetry traces", "Prometheus-compatible metrics", "JSONL audit evidence"]
     },
     responsibilities: [
       {
         service: "AgentTrust SDK",
         owns: [
-          "run-scoped identity establishment",
-          "scope authorization",
-          "guarded direct and async calls"
+          "cooperative run-scoped identity",
+          "in-process scope authorization",
+          "guarded direct, async, MCP, and LangChain calls"
         ],
         exposes: ["start run", "call", "acall", "guarded decorator"],
         dependsOn: ["policy configuration", "JWT signing secret", "local process time"],
         persistence: "No application database; local audit sink is configured by path"
       },
       {
-        service: "Guarded Adapters",
+        service: "AgentTrust Gateway",
         owns: [
-          "MCP tool-to-scope mapping",
-          "LangChain tool wrapping",
-          "delegation into AgentRun authorization"
+          "signed run identity verification",
+          "trusted tool resolution",
+          "exact-scope authorization",
+          "configured MCP tools/call execution"
         ],
-        exposes: ["GuardedMCPClient", "as_langchain_tool", "as_langchain_tools"],
-        dependsOn: ["AgentRun", "wrapped client or function", "developer routing through wrapper"],
-        persistence: "Adapter decisions are recorded through the shared audit sink"
+        exposes: ["POST /v1/tools/{tool}/execute", "GET /healthz", "GET /readyz", "GET /metrics"],
+        dependsOn: ["Ed25519 public verification key", "trusted gateway config", "configured MCP endpoint"],
+        persistence: "Local JSONL audit evidence; no durable centralized audit store"
       }
     ],
     requestFlows: [
       {
-        title: "Guarded Tool Execution",
+        title: "Gateway-Protected MCP Execution",
         summary:
-          "The host starts a run for a known agent, AgentTrust establishes scoped run identity from policy, and each guarded tool call is authorized before the underlying tool or MCP client is invoked.",
+          "The flagship demo grants deploy-agent service.status and logs.read. service_status is allowed and reaches MCP once; restart_service requires service.restart and is denied before MCP invocation.",
         layout: "authorization-branch",
         steps: [
-          "Host starts run",
-          "Policy grants scopes",
-          "Per-run identity established",
-          "Tool requires scope",
-          "Authorize required scope"
+          "Gateway receives signed run identity",
+          "Verify issuer, audience, expiry, run ID, token ID, and scopes",
+          "Resolve trusted AgentTrust tool",
+          "Read required scope from gateway config",
+          "Exact string authorization"
         ],
         branches: {
-          deny: ["Audit deny", "ToolDenied", "No execution"],
-          allow: ["Execute guarded tool", "Audit outcome"]
-        },
-        asset: {
-          src: "/projects/agenttrust/tool-execution-flow.png",
-          alt: "AgentTrust tool execution flow presentation diagram showing an agent request, identity validation, authorization, allowed tool execution, local audit logging, deny path, and response.",
-          width: 1536,
-          height: 1024
+          deny: ["restart_service requires service.restart", "Audit deny not_executed", "MCP invocation count = 0"],
+          allow: ["service_status requires service.status", "MCP tools/call executes", "Audit execution_result ok"]
         },
         notes: [
-          "Authorization precedes execution for guarded calls.",
-          "Unknown agents and out-of-scope actions fail closed.",
-          "Serialized JWT verification exists, while guarded calls use the established in-process identity."
+          "Authorization precedes MCP execution.",
+          "Unknown tools and missing scopes fail closed.",
+          "The SDK implementation is public; the enforcement-gateway implementation is maintained separately."
         ]
       }
     ],
     decisions: [
       {
-        title: "SDK-first enforcement instead of gateway",
+        title: "SDK plus independent gateway",
         context:
-          "The first milestone needed to be easy to embed in existing agent applications without introducing a network service.",
+          "SDK checks are useful for cooperative application code, but raw client access can bypass an in-process wrapper.",
         decision:
-          "Keep enforcement in the application process and route cooperative tool calls through AgentTrust.",
+          "Present AgentTrust as one initiative with public SDK enforcement and a separately maintained gateway authorization point.",
         consequence:
-          "Integration stays lightweight, but code with raw-client access can bypass the SDK boundary.",
-        sourceHref: `${agentTrustDocsBase}/threat-model.md`
+          "The SDK remains easy to adopt, while the gateway demonstrates stronger mediation when protected upstreams are not directly reachable."
       },
       {
-        title: "Short-lived scoped run identity",
+        title: "Ed25519 signed run identity",
         context:
-          "Long-lived agent-level authority makes it harder to correlate and bound individual tool sessions.",
+          "The gateway should verify identities without holding the signing authority's private key.",
         decision:
-          "Issue per-run identity containing agent ID, run ID, scopes, token ID, issuer, issued-at time, and expiry.",
+          "Use short-lived asymmetric JWT run identity with issuer, agent ID, audience, run ID, scopes, issued-at, expiration, and token ID claims.",
         consequence:
-          "Capability exposure and audit correlation improve, while revocation and key rotation remain future hardening.",
-        sourceHref: `${agentTrustRepositoryUrl}/blob/main/agenttrust/identity.py`
+          "Signing authority stays separate from enforcement; production key rotation and JWKS remain future work."
       },
       {
-        title: "Guarded adapters",
+        title: "Exact scopes from trusted config",
         context:
-          "LLM-selected tools should not execute merely because the model chose them.",
+          "The client should not be able to influence the required scope for a requested tool.",
         decision:
-          "Route direct calls, LangChain tools, and MCP client calls through the same AgentRun authorization path.",
+          "Resolve required scope and MCP mapping from trusted configuration and use exact string matching only.",
         consequence:
-          "Authorization-before-execution is consistent for guarded paths, but security depends on calls staying inside the wrapper.",
-        sourceHref: `${agentTrustRepositoryUrl}/blob/main/agenttrust/mcp.py`
+          "Authorization is deterministic and auditable; wildcard, prefix, inheritance, and case-folding semantics are intentionally absent."
       },
       {
-        title: "Local JSONL audit",
+        title: "Lifecycle audit evidence",
         context:
-          "The SDK needed an inspectable audit trail without requiring infrastructure.",
+          "Operators and future Console views need to distinguish authorization from execution without guessing from nullable fields.",
         decision:
-          "Write local JSONL audit events for guarded allow, deny, and error outcomes.",
+          "Emit authorization_decision and execution_result lifecycle records correlated by request_id.",
         consequence:
-          "The trail is transparent and portable, but it is not immutable or tamper-evident.",
-        sourceHref: `${agentTrustRepositoryUrl}/blob/main/agenttrust/audit.py`
+          "One logical request remains one logical tool call, but JSONL remains non-durable and not tamper-proof."
       }
     ],
     reliability: [
       {
-        scenario: "Unknown agent",
-        behavior: "A run cannot be started when no policy exists for the agent."
+        scenario: "Authentication failure",
+        behavior: "Missing, malformed, expired, wrong-issuer, wrong-audience, or invalidly signed run identities fail before authorization or tool execution."
       },
       {
-        scenario: "Out-of-scope action",
-        behavior: "The guarded call writes a deny audit event and raises ToolDenied before execution."
+        scenario: "Missing required scope",
+        behavior: "The gateway emits authorization_decision deny, result_status not_executed, and does not invoke MCP."
       },
       {
-        scenario: "Expired run identity",
-        behavior: "AgentRun checks expiry before guarded execution and denies expired identities."
+        scenario: "Unknown AgentTrust tool",
+        behavior: "Tool resolution fails closed; caller input is not used to construct an arbitrary upstream request."
       },
       {
-        scenario: "Tampered or wrong-secret token",
-        behavior: "The JWT verification helper fails closed for covered invalid token cases."
+        scenario: "Authorization audit persistence failure",
+        behavior: "The gateway fails closed before execution so the protected upstream is not invoked."
       },
       {
-        scenario: "Missing MCP scope mapping",
-        behavior: "The guarded MCP wrapper can fail closed when default-to-tool-name fallback is disabled."
+        scenario: "MCP execution failure",
+        behavior: "Protocol errors, tool execution errors, timeouts, and unavailable upstreams remain execution failures after an allow decision."
       },
       {
-        scenario: "Tool execution error",
-        behavior: "Allowed guarded calls audit an error status when the underlying callable raises."
+        scenario: "Post-execution audit persistence failure",
+        behavior: "The gateway preserves the actual execution outcome where safe and emits correlated fallback diagnostics instead of pretending the tool did not execute."
       }
     ],
     security: [
-      "The enforced path is AgentRun.call, AgentRun.acall, AgentRun.guarded, GuardedMCPClient, and supported guarded adapters.",
-      "A caller with direct raw-tool or raw-client access can bypass SDK-level enforcement.",
-      "Policies map known agent IDs to allowed scope patterns.",
-      "MCP tools resolve to required scopes through explicit mappings, metadata, custom resolvers, or optional tool-name fallback.",
-      "JWT verification exists, but guarded tool calls use the established in-process run identity.",
-      "Local JSONL audit logging is not tamper-evident or immutable."
+      "SDK enforcement is cooperative and in-process for AgentRun.call, AgentRun.acall, AgentRun.guarded, GuardedMCPClient, and LangChain wrappers.",
+      "Gateway enforcement independently verifies signed Ed25519 JWT run identity before protected MCP execution.",
+      "Trusted gateway configuration determines the upstream MCP URL, MCP tool mapping, required scope, timeout, and controlled headers.",
+      "Authorization is exact string matching: service.restart is not service.*, SERVICE.RESTART, or an inherited permission.",
+      "Denied restart_service requests are audited as not_executed and do not produce an MCP invocation.",
+      "Raw JWTs, Authorization headers, raw MCP arguments, keys, and sensitive payloads are excluded from telemetry and audit additions."
     ],
     observability: [
-      "Audit events correlate agent ID, run ID, token ID, tool, required scope, decision, reason, redacted arguments, result status, and timestamp.",
-      "The CLI can display local audit records with filters for agent and decision.",
-      "Redaction is key-name based and truncates long strings.",
-      "Audit logging is local SDK evidence, not centralized SIEM or non-repudiation evidence."
+      "OpenTelemetry spans cover authenticate, resolve tool, authorize, authorization audit, MCP execution, and execution-result audit boundaries.",
+      "Prometheus-compatible metrics distinguish authentication success/failure, authorization allow/deny, MCP ok/error/timeout, tool execution status, and audit write failure.",
+      "Structured logs, traces, metrics, and JSONL audit evidence correlate through request_id and trace_id where tracing is active.",
+      "Denied requests include authorization evidence but intentionally have no MCP execution span and no MCP request metric.",
+      "Safe telemetry excludes raw JWTs, raw MCP arguments, Authorization headers, key material, and sensitive MCP response bodies."
     ],
     threatModel: {
       summary:
-        "The threat model is intentionally scoped to SDK-level cooperative enforcement. It is strongest against unauthorized tool selection inside guarded paths and intentionally does not claim protection from raw-client bypass or compromised hosts.",
+        "The threat model is intentionally scoped. SDK enforcement is strongest for cooperative guarded paths; gateway enforcement is stronger only when deployment topology prevents direct upstream bypass.",
       items: [
         {
           threat: "Prompt-injected agent selects unauthorized tool",
           status: "MITIGATED",
-          mitigation: "Guarded calls authorize the required scope before execution.",
-          residualRisk: "Only applies when the host routes the call through AgentTrust."
+          mitigation: "SDK guarded calls and gateway-protected calls authorize the required scope before execution.",
+          residualRisk: "Gateway protection depends on traffic being forced through the gateway."
         },
         {
           threat: "Unknown or out-of-scope action",
           status: "MITIGATED",
-          mitigation: "Unknown agents and missing scopes fail closed in the guarded path.",
+          mitigation: "Unknown tools and missing scopes fail closed before MCP execution.",
           residualRisk: "Policy authors can still grant overly broad scopes."
         },
         {
           threat: "Expired, tampered, or wrong-secret credential",
           status: "MITIGATED",
-          mitigation: "Automated tests verify fail-closed expiry and JWT validation behavior.",
-          residualRisk: "No revocation or key rotation exists in the current MVP."
+          mitigation: "Automated tests verify fail-closed expiry and JWT validation behavior; gateway verification uses Ed25519 public material.",
+          residualRisk: "Production issuer service, JWKS, revocation, and key rotation are not implemented."
         },
         {
           threat: "Overly broad policy",
@@ -771,13 +761,13 @@ export const caseStudies = [
           threat: "Raw client or tool bypass",
           status: "NOT MITIGATED",
           mitigation: "The docs and architecture mark this as outside the SDK boundary.",
-          residualRisk: "Code with direct references can call tools without AgentTrust."
+          residualRisk: "If the protected MCP server is directly reachable, code can bypass the gateway."
         },
         {
           threat: "Compromised host process",
           status: "NOT MITIGATED",
-          mitigation: "None within the SDK-first boundary.",
-          residualRisk: "A compromised process can bypass wrappers, read secrets, or alter audit files."
+          mitigation: "None within a cooperative in-process SDK boundary.",
+          residualRisk: "A compromised process can bypass SDK wrappers, read local secrets, or attempt direct upstream access unless topology blocks it."
         },
         {
           threat: "Audit file modification",
@@ -790,54 +780,59 @@ export const caseStudies = [
     evidence: {
       title: "Verified Runtime Evidence",
       summary:
-        "The primary evidence scenario is a public-safe MCP-style demo proving authorization-before-execution for guarded calls. Credential validation is documented as automated-test evidence, not runtime-demo evidence.",
+        "The primary evidence scenario proves the gateway blocks an authenticated but unauthorized restart_service request before MCP execution while allowing service_status for the same deploy-agent identity.",
       sourceUrl: `${agentTrustDocsBase}/evidence/README.md`,
       boundary:
-        "Verified locally with synthetic data for calls routed through AgentTrust guarded execution APIs. This does not demonstrate process isolation or protection against raw-client bypass.",
+        "Verified locally with synthetic data. The public SDK implementation is linked; the enforcement-gateway implementation is maintained separately and has no public source CTA.",
       items: [
         {
-          title: "Authorization before MCP-style execution",
-          category: "Runtime demo evidence",
+          title: "Gateway ALLOW/DENY proof",
+          category: "Gateway demo evidence",
           description:
-            "An ops-reader run is granted only service.read. The allowed read invokes the fake MCP client once; the denied service.restart call raises ToolDenied and leaves the underlying invocation count at zero.",
+            "deploy-agent is granted service.status and logs.read. service_status requires service.status and executes; restart_service requires service.restart and is denied before MCP.",
           transcript: [
-            "Agent: ops-reader",
-            "ALLOW service.read underlying_invoked=True invocation_count=1",
-            "DENY service.restart tool_denied=True underlying_invoked=False invocation_count=0",
-            "AUDIT ALLOW service.read",
-            "AUDIT DENY service.restart"
+            "Agent: deploy-agent",
+            "Scopes: service.status, logs.read",
+            "ALLOW service_status required_scope=service.status HTTP_STATUS=200",
+            "MCP counters: service_status=1",
+            "DENY restart_service required_scope=service.restart HTTP_STATUS=403 ACCESS_DENIED",
+            "Audit: decision=deny reason=scope_not_granted result_status=not_executed",
+            "MCP counters: restart_service=0"
           ],
           result:
-            "The denied MCP-style action is audited and blocked before the fake underlying client executes.",
+            "An authenticated identity without service.restart cannot reach the protected restart_service MCP tool through the gateway.",
           limitation:
-            "This is guarded-client SDK evidence; it does not prove gateway enforcement or raw-client containment."
+            "This does not claim an absolute boundary if the protected MCP server is independently reachable."
         },
         {
-          title: "Credential validation",
+          title: "Authentication and authorization tests",
           category: "Automated test evidence",
           description:
-            "Tests cover expired run identities, expired serialized JWTs, tampered tokens, wrong signing secrets, and malformed scope claims.",
+            "Tests cover missing/invalid tokens, issuer/audience/expiry validation, exact-scope authorization, unknown tools, audit-failure behavior, and no upstream execution on deny.",
           transcript: [
-            "PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -p no:cacheprovider",
-            "48 passed, 3 skipped",
-            "Skipped: real MCP SDK integration tests when mcp is not installed"
+            "go test ./...",
+            "go test -race ./...",
+            "DENY restart_service -> upstream invocation count zero"
           ],
           result:
-            "Covered invalid credential cases fail closed through TokenError or ToolDenied paths.",
+            "Covered invalid credential and missing-scope cases fail closed before protected tool execution.",
           limitation:
-            "This does not claim token revocation, signing-key rotation, or a remote token-introspection service."
+            "This does not claim production key rotation, token revocation, or enterprise IAM."
         },
         {
-          title: "Allow and deny audit trail",
-          category: "Runtime demo evidence",
+          title: "Audit and observability evidence",
+          category: "Operational evidence",
           description:
-            "The same demo emits one ALLOW and one DENY audit line with the same synthetic agent/run context, tool, required scope, decision, and execution status.",
+            "Audit lifecycle records distinguish authorization decisions from execution outcomes, while traces and metrics expose ALLOW, DENY, timeout, error, and not-executed paths.",
           transcript: [
-            "ALLOW agent=ops-reader run=<synthetic> tool=service.read scope=service.read status=ok",
-            "DENY  agent=ops-reader run=<synthetic> tool=service.restart scope=service.restart status=not_executed"
+            "authorization_decision decision=allow reason=scope_granted",
+            "execution_result result_status=ok reason=execution_ok",
+            "authorization_decision decision=deny reason=scope_not_granted result_status=not_executed",
+            "DENY trace: authorization span present, no MCP execution span",
+            "DENY metrics: authorization deny incremented, no MCP request increment"
           ],
           result:
-            "Guarded calls produce local audit records for allowed and denied tool attempts.",
+            "Operators can correlate request_id and trace_id across logs, traces, metrics, and audit evidence without counting lifecycle events as two tool calls.",
           limitation:
             "Local JSONL audit is not immutable, tamper-evident, centralized, or SIEM-integrated."
         }
@@ -845,72 +840,77 @@ export const caseStudies = [
     },
     verifiedBehavior: [
       {
-        label: "Runtime demo: scoped call allowed",
-        detail: "The MCP-style evidence demo allows service.read for ops-reader and invokes the fake client once."
+        label: "Gateway demo: scoped call allowed",
+        detail: "service_status requires service.status; deploy-agent has that scope, receives HTTP 200, and increments MCP invocation count to one."
       },
       {
-        label: "Runtime demo: out-of-scope call denied",
-        detail: "The same run denies service.restart with ToolDenied because only service.read is granted."
+        label: "Gateway demo: out-of-scope call denied",
+        detail: "restart_service requires service.restart; deploy-agent has only service.status and logs.read, so the gateway returns ACCESS_DENIED."
       },
       {
-        label: "Runtime demo: denied call does not execute",
-        detail: "The denied MCP-style call leaves the fake underlying service.restart invocation count at zero."
+        label: "Gateway demo: denied call does not execute",
+        detail: "The denied restart_service path records result_status=not_executed and leaves MCP restart_service invocation count at zero."
       },
       {
-        label: "Runtime demo: allow and deny audited",
-        detail: "The demo prints ALLOW service.read and DENY service.restart audit records for the same run."
+        label: "Audit lifecycle: one logical call",
+        detail: "authorization_decision and execution_result records correlate by request_id without turning one request into two tool calls."
       },
       {
         label: "Automated tests: invalid credentials rejected",
-        detail: "Expired, tampered, wrong-secret, and malformed-scope credential cases fail closed in tests."
+        detail: "Missing, malformed, expired, wrong-issuer, wrong-audience, and invalidly signed identities fail closed."
       },
       {
-        label: "Automated tests: unknown agent denied",
-        detail: "Starting a run for an agent missing from policy raises PolicyError."
+        label: "Automated tests: caller cannot route around config",
+        detail: "Tests verify clients cannot override MCP destination, MCP tool mapping, required scope, or trusted headers."
       },
       {
-        label: "Automated tests: adapter coverage",
-        detail: "Direct, async, decorator, MCP wrapper, and LangChain guarded paths are covered by local tests."
+        label: "Observability tests: denied path has no MCP span",
+        detail: "Denied requests produce authorization evidence and metrics but no MCP execution span or MCP request metric."
       },
       {
-        label: "Verified environment caveat",
-        detail: "The latest local run reported 48 passed and 3 skipped; skipped tests were real MCP SDK integration tests because the dependency was not installed."
+        label: "Race tests pass",
+        detail: "Gateway, audit sink, metrics, and MCP adapter behavior are covered by Go race test runs."
       }
     ],
     tradeoffs: [
-      "SDK-first enforcement keeps integration lightweight but cannot stop code that bypasses the SDK.",
-      "HS256 signing keeps the MVP small, while asymmetric signing and key rotation remain future hardening.",
-      "Tool-name fallback can simplify MCP mapping, but explicit mapping is stronger for fail-closed demos.",
-      "Local JSONL audit is transparent and portable, but not tamper-evident.",
-      "Redaction avoids obvious key-name leaks, but does not perform comprehensive PII detection."
+      "SDK enforcement is lightweight and framework-friendly, but only an independent gateway can mediate calls outside cooperative application code.",
+      "Asymmetric Ed25519 run tokens keep signing authority separate from gateway verification, while production key rotation remains future work.",
+      "Static trusted tool configuration is easy to audit and demo, but dynamic policy distribution is deferred.",
+      "Exact scopes are deterministic and deny by default, but intentionally avoid wildcard and inheritance convenience.",
+      "JSONL evidence is inspectable, but not durable, centralized, immutable, or tamper-proof.",
+      "A stateless MCP tools/call adapter is narrow and testable, but not a universal MCP transport gateway.",
+      "Authorization audit failure fails closed before execution; post-execution audit failure cannot undo possible side effects.",
+      "request_id is the application/audit correlation key, while trace_id connects distributed telemetry."
     ],
     nonGoals: [
-      "No process isolation or sandboxing.",
-      "No protection from a compromised host process.",
-      "No containment for malicious tool implementations after an allowed call.",
-      "No centralized policy/control plane, enterprise IAM, or multi-tenant authorization service.",
-      "No token revocation, signing-key rotation, SIEM integration, or immutable audit storage.",
-      "No production-scale authorization, performance, adoption, or live MCP deployment claims."
+      "No production SaaS or commercial availability claim.",
+      "No managed policy control plane or policy editing UI.",
+      "No organization management, SSO/RBAC, or multi-tenant enforcement.",
+      "No durable centralized audit store or tamper-proof audit claim.",
+      "No dynamic MCP discovery or universal MCP transport proxying.",
+      "No production issuer, token revocation, or key rotation service.",
+      "No guaranteed hard boundary when protected upstreams are directly reachable outside the gateway."
     ],
     futureExtensions: [
-      "Out-of-process enforcement gateway for hard mediation.",
-      "Asymmetric credentials and signing-key rotation.",
-      "Durable or tamper-evident audit backend.",
-      "Explicit token revocation.",
-      "Centralized policy and control plane."
+      "JWKS and signing-key rotation.",
+      "Durable audit pipeline and centralized evidence ingestion.",
+      "Policy/control plane with careful change governance.",
+      "Tenant-aware authorization and organization-level administration.",
+      "MCP server identity and gateway deployment reference patterns.",
+      "Richer Console integration over normalized lifecycle evidence."
     ],
     sectionTitles: {
       demonstrates: "AI security capabilities made inspectable.",
       problem: "Model-selected tools are not authorization.",
-      architecture: "SDK enforcement boundary for cooperative tool paths.",
-      ownership: "Identity, policy, adapters, and audit stay separated.",
+      architecture: "SDK and gateway enforcement boundaries.",
+      ownership: "Identity, policy, routing, audit, and observability stay separated.",
       requestFlow: "Authorization precedes execution.",
       decisions: "Security trade-offs with the boundary named.",
-      reliability: "Fail-closed behavior inside guarded paths.",
+      reliability: "Fail-closed behavior before protected execution.",
       security: "The boundary is explicit, not implied.",
-      observability: "Audit records provide local accountability.",
+      observability: "Telemetry shows what did and did not execute.",
       threatModel: "Mitigations stay inside the stated boundary.",
-      verified: "Verified behavior without hard-isolation claims.",
+      verified: "Verified behavior with topology assumptions named.",
       tradeoffs: "Limitations that sharpen the security story.",
       future: "Future hardening, not current promises."
     },

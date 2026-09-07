@@ -36,11 +36,11 @@ export const featuredProjects: FeaturedProject[] = [
     caseStudyHref: "/projects/grpc-microservices-reference"
   },
   {
-    title: "AgentTrust — Least-Privilege Identity & Audit for AI Agents",
-    status: "Open-source AI agent authorization SDK",
+    title: "AgentTrust — Least-Privilege Security for AI Agents",
+    status: "AI agent authorization initiative",
     description:
-      "Python SDK providing short-lived scoped identities for AI agent runs, deny-by-default tool authorization, and auditable execution decisions. Integrates with MCP and LangChain while keeping identity, policy, and audit concerns isolated from framework adapters.",
-    highlights: ["Python", "JWT", "MCP", "LangChain", "Least Privilege", "Audit"],
+      "Least-privilege identity and independently enforced tool authorization for AI agents, with scoped run identities, MCP enforcement, audit evidence, and observability.",
+    highlights: ["AI Security", "Go", "Python", "JWT / Ed25519", "MCP", "OpenTelemetry", "Prometheus", "Least Privilege"],
     trustFlow: [
       "Start Run",
       "Scoped JWT",
@@ -50,7 +50,7 @@ export const featuredProjects: FeaturedProject[] = [
       "Execute if Allowed"
     ],
     boundary:
-      "Soft in-process enforcement for cooperative first-party code; hard out-of-process enforcement remains roadmap work.",
+      "Public SDK enforcement is cooperative and in-process; the separately maintained gateway demonstrates an independent authorization point when topology prevents direct upstream bypass.",
     href: repositoryLinks.agentTrust,
     caseStudyHref: "/projects/agenttrust"
   }
