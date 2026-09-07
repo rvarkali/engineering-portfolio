@@ -906,13 +906,13 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
         <div>
           <DiagramLightboxButton
             asset={{
-              src: "/images/agenttrust/agenttrust-architecture-execution.png",
-              alt: "AgentTrust system architecture and protected tool execution flow showing the AI application, public SDK, independent gateway authorization boundary, protected MCP tools, observability, and ALLOW versus DENY execution paths.",
-              width: 1536,
-              height: 1024
+              src: "/images/agenttrust/agenttrust-system-architecture.png",
+              alt: "AgentTrust system architecture showing the AI application, public SDK, independent gateway enforcement boundary, protected MCP tools, and cross-cutting logs, traces, metrics, and audit evidence.",
+              width: 1774,
+              height: 887
             }}
             label="View architecture"
-            lightboxTitle="AgentTrust System Architecture and Tool Execution Flow"
+            lightboxTitle="AgentTrust System Architecture"
             priority
             sizes="(min-width: 1152px) 1152px, 100vw"
           />
@@ -923,6 +923,20 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
         <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-600">
           Independent enforcement assumes deployment topology prevents untrusted agents from directly bypassing the gateway and reaching protected upstreams.
         </p>
+      </LightSection>
+
+      <LightSection id="tool-execution-flow" eyebrow="Tool Execution Flow" title="How a protected tool request moves through AgentTrust." description="A protected request is authenticated, resolved against trusted tool configuration, and exact-scope authorized before MCP execution. DENY terminates before the protected tool is invoked.">
+        <DiagramLightboxButton
+          asset={{
+            src: "/images/agenttrust/agenttrust-tool-execution-flow.png",
+            alt: "AgentTrust protected tool execution flow showing request identification, Ed25519 JWT verification, trusted tool resolution, exact-scope authorization, ALLOW execution through MCP, and DENY termination with no MCP invocation.",
+            width: 1774,
+            height: 887
+          }}
+          label="View flow"
+          lightboxTitle="AgentTrust Tool Execution Flow"
+          sizes="(min-width: 1152px) 1152px, 100vw"
+        />
       </LightSection>
 
       <LightSection id="security-proof" eyebrow="ALLOW / DENY Security Proof" title="Authorization decides whether MCP is reached." description={primaryFlow?.summary}>
