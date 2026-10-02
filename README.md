@@ -40,7 +40,7 @@ Personal engineering portfolio needs a clear, public, implementation-backed home
 
 ## Planned Architecture Work
 
-Initial architecture work will evaluate professional and premium UX, responsive design, accessibility, SEO, Open Graph metadata, Person structured data, sitemap, robots.txt, architecture case studies, GitHub project showcase, resume download, LinkedIn link, GitHub link, professional inquiries form, privacy-conscious analytics, a restrained indigo, blue, and violet technical visual system, no public Open to Work messaging, no proprietary employer information. Planned deployment URL: https://ravinder.ravionxgroup.com. Target audience includes engineering recruiters, hiring managers, senior staff engineers, principal engineers, software architects, and architecture interviewers.
+Initial architecture work will evaluate professional and premium UX, responsive design, accessibility, SEO, Open Graph metadata, Person structured data, sitemap, robots.txt, architecture case studies, GitHub project showcase, resume download, LinkedIn link, GitHub link, professional inquiries form, privacy-conscious analytics, a restrained indigo, blue, and violet technical visual system, no public Open to Work messaging, no proprietary employer information. Planned deployment URL: [Portfolio](https://ravinder.ravionxgroup.com). Target audience includes engineering recruiters, hiring managers, senior staff engineers, principal engineers, software architects, and architecture interviewers.
 
 ## Planned Security Work
 
@@ -132,8 +132,8 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE).
 
 Ravinder Varkali
 
-GitHub: https://github.com/rvarkali
+GitHub: [https://github.com/rvarkali](https://github.com/rvarkali)
 
-LinkedIn: https://www.linkedin.com/in/ravindervarkali
+LinkedIn: [https://www.linkedin.com/in/ravindervarkali](https://www.linkedin.com/in/ravindervarkali)
 
-Portfolio: https://ravinder.ravionxgroup.com
+Portfolio: [https://ravinder.ravionxgroup.com](https://ravinder.ravionxgroup.com)
