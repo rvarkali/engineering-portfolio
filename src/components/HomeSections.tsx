@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { profile, recognition } from "@/data/profile";
+import { patents, profile, recognition } from "@/data/profile";
 import { experienceHighlights } from "@/data/experience";
 import { featuredProjects } from "@/data/projects";
 import { LinkButton } from "./LinkButton";
@@ -235,6 +235,46 @@ export function FeaturedEngineeringSection() {
           <ProjectCard {...project} key={project.title} />
         ))}
       </div>
+    </Section>
+  );
+}
+
+export function PatentsInnovationSection() {
+  const [patent] = patents;
+
+  return (
+    <Section
+      id="patents-innovation"
+      eyebrow="Patents & Innovation"
+      title="Patents and applied innovation"
+      description="Selected work in cloud observability, distributed diagnostics, and service troubleshooting."
+      className="border-t border-portfolio-border bg-portfolio-surface"
+      contentClassName="mt-6 sm:mt-7"
+      paddingClassName="pt-8 pb-8 sm:pt-10 sm:pb-10 lg:pt-9 lg:pb-10"
+    >
+      <article className="max-w-4xl rounded-lg border border-portfolio-border bg-white p-5 shadow-[0_8px_24px_rgba(7,17,38,0.035)] sm:p-6">
+        <p className="text-[11px] font-semibold uppercase leading-none tracking-[0.18em] text-portfolio-accent">
+          U.S. Patent Application
+        </p>
+        <h3 className="mt-3 text-[1.35rem] font-bold leading-[1.18] tracking-[-0.018em] text-portfolio-ink sm:text-[1.55rem]">
+          {patent.title}
+        </h3>
+        <p className="mt-3 text-sm font-semibold leading-6 text-portfolio-body sm:text-base">
+          U.S. Patent Application {patent.applicationNumber} · Filed {patent.filingYear}
+        </p>
+        <p className="mt-3 max-w-3xl text-[15px] font-normal leading-[1.62] text-portfolio-body">
+          Patent application for a cloud observability framework that enables troubleshooting and
+          monitoring of services.
+        </p>
+        <Link
+          className="mt-4 inline-flex min-h-9 items-center justify-center rounded-md border border-transparent px-0 text-sm font-semibold leading-none text-portfolio-accent transition-colors duration-200 hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent"
+          href={patent.href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View Patent →
+        </Link>
+      </article>
     </Section>
   );
 }

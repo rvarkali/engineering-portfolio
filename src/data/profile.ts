@@ -22,6 +22,15 @@ export const recognition = [
   "IBM Bravo Award"
 ];
 
+export const patents = [
+  {
+    title: "Cloud Observability Framework for Providing Troubleshooting and Monitoring for Services",
+    applicationNumber: "19/069,767",
+    filingYear: "2025",
+    href: "https://patents.justia.com/patent/20260197333"
+  }
+] as const;
+
 export const credentials = {
   education: [
     "M.Tech, Computer Science and Engineering — Indian Institute of Technology Madras",

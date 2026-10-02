@@ -5,7 +5,8 @@ import {
   CapabilityStrip,
   CareerSummarySection,
   Footer,
-  FeaturedEngineeringSection
+  FeaturedEngineeringSection,
+  PatentsInnovationSection
 } from "@/components/HomeSections";
 
 export default function Home() {
@@ -16,6 +17,7 @@ export default function Home() {
       <CapabilityStrip />
       <AboutSection />
       <FeaturedEngineeringSection />
+      <PatentsInnovationSection />
       <CareerSummarySection />
       <Footer />
     </main>

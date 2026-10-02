@@ -12,6 +12,7 @@ const inter = Inter({
 const title = "Ravinder Varkali — Senior Staff / Principal Software Engineer";
 const description =
   "Engineering portfolio focused on distributed systems, cloud platforms, backend architecture, applied AI, observability, reliability, security, and technical leadership.";
+const iconHref = "/icon.svg?v=2";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -46,9 +47,9 @@ export const metadata: Metadata = {
     follow: true
   },
   icons: {
-    icon: "/icon.svg",
-    shortcut: "/icon.svg",
-    apple: "/icon.svg"
+    icon: [{ url: iconHref, type: "image/svg+xml" }],
+    shortcut: [iconHref],
+    apple: [{ url: iconHref, type: "image/svg+xml" }]
   }
 };
 
