@@ -566,7 +566,6 @@ function GrpcReferencePage({ caseStudy }: { caseStudy: CaseStudy }) {
         {caseStudy.architecture.asset ? (
           <DiagramLightboxButton
             asset={caseStudy.architecture.asset}
-            label="View architecture"
             lightboxTitle="System Architecture"
             priority
             sizes="(min-width: 1152px) 1152px, 100vw"
@@ -596,7 +595,6 @@ function GrpcReferencePage({ caseStudy }: { caseStudy: CaseStudy }) {
         {primaryFlow?.asset ? (
           <DiagramLightboxButton
             asset={primaryFlow.asset}
-            label="View flow"
             lightboxTitle="Diagnostic Job Request Flow"
             sizes="(min-width: 1152px) 1152px, 100vw"
           />
@@ -911,7 +909,6 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
               width: 1774,
               height: 887
             }}
-            label="View architecture"
             lightboxTitle="AgentTrust System Architecture"
             priority
             sizes="(min-width: 1152px) 1152px, 100vw"
@@ -933,7 +930,6 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
             width: 1774,
             height: 887
           }}
-          label="View flow"
           lightboxTitle="AgentTrust Tool Execution Flow"
           sizes="(min-width: 1152px) 1152px, 100vw"
         />
@@ -1630,7 +1626,131 @@ function ThreatModelMatrix({ threatModel }: { threatModel: NonNullable<CaseStudy
   );
 }
 
+function EnterpriseIdentityPage({ caseStudy }: { caseStudy: CaseStudy }) {
+  const validationUrl = `${caseStudy.repositoryUrl}/blob/main/docs/security/portfolio-validation-summary.md`;
+  const highlights = [
+    ["Identity", "OAuth2/OIDC + PKCE"],
+    ["Authorization", "OpenFGA + OPA"],
+    ["Machine Security", "mTLS + JWT"],
+    ["Validation", "259 recorded passing tests"]
+  ];
+  const validationMetrics = [
+    ["259", "Total passing tests"],
+    ["187", "Java tests"],
+    ["72", "Python tests"]
+  ];
+  return (
+    <main className="bg-white font-sans text-portfolio-ink">
+      <section className="border-b border-portfolio-border bg-[radial-gradient(circle_at_top_right,rgba(23,105,255,0.12),transparent_34%),linear-gradient(180deg,#ffffff,#f7fbff)]">
+        <div className={`${pageShell} py-7 sm:py-10`}>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <LinkButton href="/#featured-engineering" variant="tertiary">← Back to Portfolio</LinkButton>
+            <LinkButton href={caseStudy.repositoryUrl} newTab>View on GitHub ↗</LinkButton>
+          </div>
+          <div className="mt-10 max-w-4xl">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-portfolio-accent">{caseStudy.eyebrow}</p>
+            <h1 className="mt-4 text-4xl font-[720] leading-[1.08] tracking-normal text-[#050b2d] sm:text-5xl lg:text-6xl">{caseStudy.title}</h1>
+            <p className="mt-5 text-lg leading-8 text-slate-700 sm:text-xl">{caseStudy.summary}</p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              {caseStudy.stack.map((item) => <span className="rounded-md border border-blue-200 bg-blue-50 px-2.5 py-1.5 text-sm font-[620] text-slate-700" key={item}>{item}</span>)}
+            </div>
+            <p className="mt-5 text-sm leading-6 text-slate-600">Published offline reference · 259 recorded passing tests · No production deployment claim</p>
+          </div>
+          <nav aria-label="Case study sections" className="mt-7 flex flex-wrap gap-x-6 gap-y-3 text-sm font-semibold text-portfolio-accent">
+            <a className="rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent" href="#architecture">Architecture</a>
+            <a className="rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent" href="#security-flows">Authentication & Authorization</a>
+            <a className="rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent" href="#decisions">Decisions</a>
+            <a className="rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent" href="#validation">Validation</a>
+            <a className="rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent" href="#limitations">Limitations</a>
+          </nav>
+          <div aria-label="Engineering highlights" className="mt-8 grid overflow-hidden rounded-lg border border-blue-100 bg-white/90 shadow-[0_10px_35px_rgba(15,45,88,0.05)] sm:grid-cols-2 lg:grid-cols-4">
+            {highlights.map(([label, detail]) => (
+              <div className="border-blue-100 px-4 py-3.5 sm:border-l sm:first:border-l-0" key={label}>
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-portfolio-accent">{label}</p>
+                <p className="mt-1 text-sm font-semibold leading-5 text-portfolio-ink">{detail}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <LightSection id="architecture" eyebrow="System Architecture" title="One API, distinct human and machine boundaries." description={caseStudy.architecture.summary}>
+        {caseStudy.architecture.asset ? <>
+          <DiagramLightboxButton asset={caseStudy.architecture.asset} lightboxTitle="Enterprise IAM Architecture" priority sizes="(min-width: 1152px) 1152px, 100vw" />
+          <p className="mt-3 text-sm leading-6 text-slate-600">Select the illustration to preview it, or <a className="font-semibold text-portfolio-accent underline underline-offset-4" href={caseStudy.architecture.asset.src} target="_blank" rel="noopener noreferrer">open the full-resolution image ↗</a> to zoom into labels on a smaller screen.</p>
+        </> : null}
+        <div className="mt-7 grid gap-4 md:grid-cols-2">
+          {caseStudy.architecture.components.map((item) => <p className="border-l-2 border-blue-200 pl-4 text-sm leading-7 text-slate-600" key={item}>{item}</p>)}
+        </div>
+      </LightSection>
+
+      <LightSection id="problem" eyebrow="Engineering Problem" title="Identity is the start of the decision." description={caseStudy.problem}>
+        <CompactScopeList items={caseStudy.constraints} />
+      </LightSection>
+
+      <LightSection id="security-flows" eyebrow="Authentication & Authorization" title="Three flows, explicit enforcement points.">
+        <div className="space-y-5">
+          {caseStudy.requestFlows.map((flow) => (
+            <article className="rounded-lg border border-blue-100 bg-white p-5 shadow-[0_10px_35px_rgba(15,45,88,0.06)] sm:p-6" key={flow.title}>
+              <h3 className="text-xl font-bold text-portfolio-ink">{flow.title}</h3>
+              <p className="mt-2 text-sm leading-7 text-slate-600">{flow.summary}</p>
+              <ol className="mt-5 grid list-decimal gap-5 pl-5 text-sm leading-7 text-slate-700 md:grid-cols-3 md:gap-8">
+                {flow.steps.map((step) => <li className="pl-1 marker:font-bold marker:text-portfolio-accent" key={step}>{step}</li>)}
+              </ol>
+              {flow.notes.map((note) => <p className="mt-5 rounded-md bg-blue-50 p-3 text-sm leading-6 text-slate-700" key={note}>{note}</p>)}
+            </article>
+          ))}
+        </div>
+      </LightSection>
+
+      <LightSection id="decisions" eyebrow="Engineering Decisions" title="Boundaries with deliberate trade-offs.">
+        <div className="grid gap-4 md:grid-cols-2">
+          {caseStudy.decisions.map((decision) => (
+            <article className="rounded-lg border border-blue-100 bg-white p-5 shadow-[0_10px_35px_rgba(15,45,88,0.06)]" key={decision.title}>
+              <h3 className="text-base font-bold text-portfolio-ink">{decision.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-slate-700">{decision.decision}</p>
+              <p className="mt-3 text-sm leading-7 text-slate-600">{decision.consequence}</p>
+              {decision.sourceHref ? <Link className="mt-4 inline-flex text-sm font-bold text-portfolio-accent hover:text-blue-700" href={decision.sourceHref} target="_blank" rel="noopener noreferrer">Inspect implementation ↗</Link> : null}
+            </article>
+          ))}
+        </div>
+      </LightSection>
+
+      <section id="security" className="scroll-mt-24 border-b border-portfolio-border bg-slate-50 py-10">
+        <div className={pageShell}><LightDetailPanel eyebrow="Security Engineering" title="Enforce each boundary; fail closed." items={caseStudy.security} /></div>
+      </section>
+
+      <LightSection id="validation" eyebrow="Recorded Offline Evidence" title="Security regression results.">
+        <div className="grid overflow-hidden rounded-lg border border-blue-100 bg-slate-50 sm:grid-cols-3">
+          {validationMetrics.map(([value, label]) => <article className="border-blue-100 px-5 py-5 text-center sm:border-l sm:first:border-l-0" key={label}><p className="text-3xl font-bold tracking-tight text-portfolio-accent">{value}</p><h3 className="mt-1 text-sm font-semibold text-portfolio-ink">{label}</h3></article>)}
+        </div>
+        <p className="mt-5 max-w-4xl text-sm leading-7 text-slate-600">Recorded offline regression coverage. Native OPA/OpenFGA checks were excluded. These results do not establish production deployment or complete end-to-end integration.</p>
+        <p className="mt-5 text-sm text-slate-700">From the IAM repository, with JDK 21, Python 3.9+, Maven and cached dependencies:</p>
+        <pre className="mt-3 overflow-x-auto rounded-lg border border-blue-100 bg-slate-50 p-4 text-sm text-portfolio-ink"><code>python3 infrastructure/testing/security_regression.py</code></pre>
+        <div className="mt-5 flex flex-wrap gap-3">
+          <LinkButton href={validationUrl} newTab>Read validation evidence ↗</LinkButton>
+          <LinkButton href={`${caseStudy.repositoryUrl}/blob/main/infrastructure/testing/README.md`} newTab variant="tertiary">Regression prerequisites ↗</LinkButton>
+        </div>
+      </LightSection>
+
+      <LightSection id="limitations" eyebrow="Scope & Limitations" title="An inspectable reference, with evidence boundaries.">
+        <ul className="max-w-4xl list-disc space-y-3 pl-5 text-sm leading-7 text-slate-600">
+          {caseStudy.nonGoals.map((item) => <li key={item}>{item}</li>)}
+        </ul>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <LinkButton href={caseStudy.repositoryUrl} newTab>Explore source code ↗</LinkButton>
+          <LinkButton href={validationUrl} newTab variant="tertiary">Validation record ↗</LinkButton>
+          <LinkButton href={`${caseStudy.repositoryUrl}/blob/main/docs/security/public-credential-exposure-response.md`} newTab variant="tertiary">Security disposition ↗</LinkButton>
+        </div>
+      </LightSection>
+    </main>
+  );
+}
+
 export function CaseStudyPage({ caseStudy }: { caseStudy: CaseStudy }) {
+  if (caseStudy.slug === "enterprise-identity-security-reference") {
+    return <EnterpriseIdentityPage caseStudy={caseStudy} />;
+  }
   if (caseStudy.slug === "grpc-microservices-reference") {
     return <GrpcReferencePage caseStudy={caseStudy} />;
   }

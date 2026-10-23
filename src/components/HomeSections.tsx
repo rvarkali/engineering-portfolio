@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { patents, profile, recognition } from "@/data/profile";
 import { experienceHighlights } from "@/data/experience";
-import { featuredProjects } from "@/data/projects";
+import { enterpriseIdentityArchitecture, enterpriseIdentityProject, featuredProjects } from "@/data/projects";
 import { LinkButton } from "./LinkButton";
 import { ProjectCard } from "./ProjectCard";
 import { Section } from "./Section";
@@ -200,6 +200,16 @@ export function FeaturedEngineeringSection() {
       lightboxTitle: "AgentTrust Identity, Gateway Authorization & Audit Architecture"
     },
     {
+      title: enterpriseIdentityProject.title,
+      category: "Identity Security / Backend Engineering",
+      description: enterpriseIdentityProject.description,
+      technologies: ["Java", "Spring Boot", "OAuth2/OIDC", "OpenFGA", "OPA", "mTLS"],
+      href: enterpriseIdentityProject.caseStudyHref,
+      githubHref: enterpriseIdentityProject.href,
+      image: enterpriseIdentityArchitecture,
+      lightboxTitle: "Enterprise IAM Architecture — Human Authorization and Machine Identity"
+    },
+    {
       title: "Observability & Troubleshooting Platform",
       category: "Platform Engineering",
       description:
@@ -230,7 +240,7 @@ export function FeaturedEngineeringSection() {
           View all projects →
         </LinkButton>
       </div>
-      <div className="grid items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid auto-rows-fr items-stretch gap-5 md:grid-cols-2">
         {projects.map((project) => (
           <ProjectCard {...project} key={project.title} />
         ))}

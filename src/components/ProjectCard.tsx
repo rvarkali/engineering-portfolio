@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { ArchitectureLightbox } from "./ArchitectureLightbox";
+import { ZoomIndicator } from "./ZoomIndicator";
 
 type ProjectCardProps = {
   category: string;
@@ -38,9 +39,10 @@ export function ProjectCard({
     <article className="group flex h-full flex-col overflow-hidden rounded-[16px] border border-portfolio-border bg-white shadow-[0_8px_24px_rgba(7,17,38,0.035)] transition-[border-color,box-shadow] duration-200 ease-out hover:border-blue-300 hover:shadow-[0_14px_34px_rgba(7,17,38,0.07)]">
       <div className="border-b border-portfolio-border bg-[#f6f9fd] p-3 sm:p-4">
         <button
-          aria-label={`View full architecture diagram for ${title}`}
-          className="group/image relative flex aspect-[16/10] min-h-[180px] w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-[12px] bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent"
+          aria-label={`Enlarge architecture diagram for ${title}`}
+          className="group/image group/zoom relative flex aspect-[16/10] min-h-[180px] w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-[12px] bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent"
           ref={imageButtonRef}
+          title="Click to enlarge"
           type="button"
           onClick={() => setIsLightboxOpen(true)}
         >
@@ -51,9 +53,7 @@ export function ProjectCard({
             sizes="(min-width: 1280px) 384px, (min-width: 768px) 48vw, 100vw"
             className="origin-center object-contain p-1 transition-transform duration-200 ease-out group-hover/image:scale-[1.006] motion-reduce:transition-none motion-reduce:group-hover/image:scale-100"
           />
-          <span className="pointer-events-none absolute right-3 top-3 rounded-md border border-portfolio-border bg-white/92 px-2.5 py-1.5 text-xs font-semibold text-portfolio-accent opacity-0 shadow-[0_8px_20px_rgba(7,17,38,0.08)] transition-opacity duration-200 ease-out group-hover/image:opacity-100 group-focus-visible/image:opacity-100 motion-reduce:transition-none">
-            View architecture ↗
-          </span>
+          <ZoomIndicator />
         </button>
       </div>
 

@@ -1,3 +1,5 @@
+import { enterpriseIdentityCaseStudy } from "./enterprise-identity";
+
 export type CapabilityGroup = {
   title: string;
   items: string[];
@@ -141,6 +143,7 @@ const agentTrustRepositoryUrl = "https://github.com/ravionxgroup/agenttrust";
 const agentTrustDocsBase = `${agentTrustRepositoryUrl}/blob/main/docs`;
 
 export const caseStudies = [
+  enterpriseIdentityCaseStudy,
   {
     slug: "grpc-microservices-reference",
     title: "gRPC Microservices Reference",
