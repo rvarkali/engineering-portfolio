@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
 import { LinkButton } from "@/components/LinkButton";
-import { articles } from "@/data/writing";
+import { getArticlesNewestFirst } from "@/data/writing";
 
 export const metadata: Metadata = {
-  title: "Engineering Notes",
+  title: "Engineering Insights",
   description:
-    "Technical writing on distributed systems, platform engineering, reliability, and AI infrastructure grounded in implemented systems.",
+    "Source-backed engineering articles on distributed systems, identity security, platform engineering, reliability, and applied AI.",
   alternates: {
     canonical: "/writing"
   },
   openGraph: {
-    title: "Engineering Notes",
+    title: "Engineering Insights",
     description:
-      "Technical writing on distributed systems, platform engineering, reliability, and AI infrastructure grounded in implemented systems.",
+      "Source-backed engineering articles on distributed systems, identity security, platform engineering, reliability, and applied AI.",
     url: "/writing",
     siteName: "Ravinder Varkali Engineering Portfolio",
     type: "website",
@@ -20,9 +20,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary",
-    title: "Engineering Notes",
+    title: "Engineering Insights",
     description:
-      "Technical writing on distributed systems, platform engineering, reliability, and AI infrastructure grounded in implemented systems.",
+      "Source-backed engineering articles on distributed systems, identity security, platform engineering, reliability, and applied AI.",
     images: []
   }
 };
@@ -34,7 +34,18 @@ const labelText = "text-xs font-semibold uppercase tracking-[0.16em]";
 const lightMetadataLabel = `${labelText} text-portfolio-accent`;
 const lightMutedLabel = `${labelText} text-portfolio-muted`;
 
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC"
+  }).format(new Date(`${value}T00:00:00Z`));
+}
+
 export default function WritingIndexPage() {
+  const articles = getArticlesNewestFirst();
+
   return (
     <main className="bg-white font-sans text-portfolio-ink">
       <section className="border-b border-portfolio-border bg-[radial-gradient(circle_at_top_right,rgba(23,105,255,0.1),transparent_34%),linear-gradient(180deg,#ffffff,#f7fbff)]">
@@ -42,13 +53,13 @@ export default function WritingIndexPage() {
           <LinkButton href="/" variant="tertiary">
             Back to Portfolio
           </LinkButton>
-          <p className={`mt-8 ${lightMetadataLabel}`}>Writing / Engineering Notes</p>
+          <p className={`mt-8 ${lightMetadataLabel}`}>Writing / Engineering Insights</p>
           <h1 className="mt-3 text-4xl font-[720] leading-tight tracking-normal text-[#050b2d] sm:text-5xl">
-            Engineering Notes
+            Engineering Insights
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-portfolio-body sm:text-lg sm:leading-8">
-            Short technical notes on distributed systems, platform engineering,
-            reliability, and AI infrastructure, grounded in implemented systems.
+            Source-backed articles on architecture, distributed systems, identity security,
+            platform engineering, reliability, and applied AI.
           </p>
         </div>
       </section>
@@ -59,7 +70,9 @@ export default function WritingIndexPage() {
             <article className={`${cardSurface} p-4 sm:p-5`} key={article.slug}>
               <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
                 <div>
-                  <p className={lightMetadataLabel}>{article.readingTime}</p>
+                  <p className={lightMetadataLabel}>
+                    {article.publishedAt ? `${article.publicationDateProvisional ? "Provisional · " : ""}${formatDate(article.publishedAt)} · ` : ""}{article.readingTime}
+                  </p>
                   <h2 className="mt-3 text-2xl font-[620] leading-tight text-portfolio-ink">
                     {article.title}
                   </h2>
@@ -69,7 +82,7 @@ export default function WritingIndexPage() {
                   <p className={`mt-4 ${lightMutedLabel}`}>Related project: {article.project}</p>
                 </div>
                 <LinkButton href={`/writing/${article.slug}`} variant="primary">
-                  Read Note →
+                  Read Insight →
                 </LinkButton>
               </div>
             </article>

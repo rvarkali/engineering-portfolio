@@ -1,9 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DiagramLightboxButton } from "@/components/DiagramLightboxButton";
 import { LinkButton } from "@/components/LinkButton";
-import { articles, getArticle, type ArticleSection } from "@/data/writing";
-import { siteUrl } from "@/data/profile";
+import { profile, siteUrl } from "@/data/profile";
+import {
+  articles,
+  getArticle,
+  getConfirmedModifiedDate,
+  getConfirmedPublicationDate,
+  type ArticleBlock,
+  type ArticleSection
+} from "@/data/writing";
 
 type WritingPageProps = {
   params: Promise<{
@@ -18,6 +26,15 @@ const labelText = "text-xs font-semibold uppercase tracking-[0.16em]";
 const lightMetadataLabel = `${labelText} text-portfolio-accent`;
 const lightMutedLabel = `${labelText} text-portfolio-muted`;
 const bodyText = "text-base leading-8 text-portfolio-body";
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC"
+  }).format(new Date(`${value}T00:00:00Z`));
+}
 
 export const dynamicParams = false;
 
@@ -36,6 +53,8 @@ export async function generateMetadata({ params }: WritingPageProps): Promise<Me
   }
 
   const url = `${siteUrl}/writing/${article.slug}`;
+  const publishedTime = getConfirmedPublicationDate(article);
+  const modifiedTime = getConfirmedModifiedDate(article);
 
   return {
     title: article.title,
@@ -49,13 +68,24 @@ export async function generateMetadata({ params }: WritingPageProps): Promise<Me
       url,
       siteName: "Ravinder Varkali Engineering Portfolio",
       type: "article",
-      images: []
+      publishedTime,
+      modifiedTime,
+      authors: article.author ? [article.author] : undefined,
+      tags: article.tags,
+      images: [
+        {
+          url: "/og.png",
+          width: 1200,
+          height: 630,
+          alt: "Ravinder Varkali Engineering Portfolio"
+        }
+      ]
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: article.title,
       description: article.description,
-      images: []
+      images: ["/og.png"]
     }
   };
 }
@@ -122,7 +152,157 @@ function ListSection({ section }: { section: Extract<ArticleSection, { kind: "li
   );
 }
 
+function ArticleList({ block }: { block: Extract<ArticleBlock, { kind: "list" }> }) {
+  const List = block.ordered ? "ol" : "ul";
+  return (
+    <List className={`${block.ordered ? "list-decimal" : "list-disc"} space-y-3 pl-6 text-base leading-8 text-portfolio-body marker:font-semibold marker:text-portfolio-accent`}>
+      {block.items.map((item) => (
+        <li className="pl-1" key={item}>{item}</li>
+      ))}
+    </List>
+  );
+}
+
+function ArticleCode({ block }: { block: Extract<ArticleBlock, { kind: "code" }> }) {
+  return (
+    <figure className={`${cardSurface} overflow-hidden`}>
+      <figcaption className="flex flex-wrap items-center justify-between gap-3 border-b border-portfolio-border bg-portfolio-atmosphere px-4 py-3 sm:px-5">
+        <span className="text-sm font-semibold text-portfolio-ink">{block.caption}</span>
+        <span className={lightMetadataLabel}>{block.language}</span>
+      </figcaption>
+      <pre className="overflow-x-auto bg-[#071126] p-4 text-[13px] leading-6 text-slate-100 sm:p-5 sm:text-sm">
+        <code>{block.code}</code>
+      </pre>
+      {block.note || block.sourceHref ? (
+        <div className="space-y-2 border-t border-portfolio-border bg-white px-4 py-3 text-sm leading-6 text-portfolio-body sm:px-5">
+          {block.note ? <p>{block.note}</p> : null}
+          {block.sourceHref ? (
+            <Link className="inline-flex font-semibold text-portfolio-accent underline decoration-blue-200 underline-offset-4 hover:text-blue-700" href={block.sourceHref} target="_blank" rel="noopener noreferrer">
+              {block.sourceLabel ?? "Inspect source"} ↗
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
+    </figure>
+  );
+}
+
+function ArticleDiagram({ block }: { block: Extract<ArticleBlock, { kind: "diagram" }> }) {
+  return (
+    <figure>
+      <DiagramLightboxButton
+        asset={block.asset}
+        lightboxTitle={block.lightboxTitle}
+        sizes="(min-width: 896px) 896px, 100vw"
+      />
+      <figcaption className="mt-3 text-sm leading-6 text-portfolio-muted">
+        {block.caption}{" "}
+        <a className="font-semibold text-portfolio-accent underline decoration-blue-200 underline-offset-4 hover:text-blue-700" href={block.asset.src} target="_blank" rel="noopener noreferrer">
+          Open full-resolution diagram ↗
+        </a>
+      </figcaption>
+    </figure>
+  );
+}
+
+function ArticleTable({ block }: { block: Extract<ArticleBlock, { kind: "table" }> }) {
+  return (
+    <figure>
+      <div className={`${cardSurface} overflow-x-auto`}>
+        <table className="w-full min-w-[640px] border-collapse text-left text-sm leading-6">
+          <thead className="bg-portfolio-atmosphere text-portfolio-ink">
+            <tr>
+              {block.columns.map((column) => (
+                <th className="border-b border-portfolio-border px-4 py-3 font-semibold sm:px-5" scope="col" key={column}>{column}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-portfolio-border text-portfolio-body">
+            {block.rows.map((row, rowIndex) => (
+              <tr className="align-top" key={`${row[0]}-${rowIndex}`}>
+                {row.map((cell, cellIndex) => (
+                  <td className={`px-4 py-3 sm:px-5 ${cellIndex === 0 ? "font-medium text-portfolio-ink" : ""}`} key={`${cell}-${cellIndex}`}>{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {block.caption ? <figcaption className="mt-3 text-sm leading-6 text-portfolio-muted">{block.caption}</figcaption> : null}
+    </figure>
+  );
+}
+
+function ArticleCallout({ block }: { block: Extract<ArticleBlock, { kind: "callout" }> }) {
+  const tone = block.tone ?? "implementation";
+  const toneClass = {
+    implementation: "border-blue-200 bg-blue-50/70",
+    recommendation: "border-amber-200 bg-amber-50/70",
+    limitation: "border-slate-300 bg-slate-50"
+  }[tone];
+  return (
+    <aside className={`rounded-lg border p-4 sm:p-5 ${toneClass}`}>
+      <p className={lightMetadataLabel}>{block.label}</p>
+      <p className="mt-2 text-sm leading-7 text-portfolio-body sm:text-base">{block.text}</p>
+    </aside>
+  );
+}
+
+function ArticleReference({ block }: { block: Extract<ArticleBlock, { kind: "reference" }> }) {
+  return (
+    <aside className="rounded-lg border border-slate-300 bg-slate-50 p-4 sm:p-5">
+      <p className={lightMetadataLabel}>{block.label}</p>
+      <Link
+        className="mt-2 inline-flex font-semibold text-portfolio-ink underline decoration-blue-200 underline-offset-4 hover:text-portfolio-accent"
+        href={block.href}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {block.title} ↗
+      </Link>
+      <p className={`mt-4 ${lightMutedLabel}`}>{block.revisionLabel}</p>
+      <Link
+        className="mt-2 inline-flex font-mono text-sm font-semibold text-portfolio-accent underline decoration-blue-200 underline-offset-4 hover:text-blue-700"
+        href={block.revisionHref}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {block.revision} ↗
+      </Link>
+      <p className="mt-4 text-sm leading-7 text-portfolio-body sm:text-base">{block.text}</p>
+    </aside>
+  );
+}
+
+function ArticleBlockView({ block }: { block: ArticleBlock }) {
+  if (block.kind === "paragraph") return <p className={bodyText}>{block.text}</p>;
+  if (block.kind === "subheading") return <h3 className="pt-2 text-xl font-[620] leading-tight text-portfolio-ink">{block.title}</h3>;
+  if (block.kind === "list") return <ArticleList block={block} />;
+  if (block.kind === "code") return <ArticleCode block={block} />;
+  if (block.kind === "diagram") return <ArticleDiagram block={block} />;
+  if (block.kind === "table") return <ArticleTable block={block} />;
+  if (block.kind === "callout") return <ArticleCallout block={block} />;
+  return <ArticleReference block={block} />;
+}
+
+function RichSection({ section }: { section: Extract<ArticleSection, { kind: "rich" }> }) {
+  return (
+    <section className="scroll-mt-24 py-7 sm:py-9" id={section.id}>
+      <h2 className="text-2xl font-[650] leading-tight text-portfolio-ink sm:text-3xl">{section.title}</h2>
+      <div className="mt-5 space-y-5">
+        {section.blocks.map((block, index) => (
+          <ArticleBlockView block={block} key={`${block.kind}-${index}`} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function ArticleSectionView({ section }: { section: ArticleSection }) {
+  if (section.kind === "rich") {
+    return <RichSection section={section} />;
+  }
+
   if (section.kind === "sequence") {
     return <SequenceSection section={section} />;
   }
@@ -142,13 +322,43 @@ export default async function WritingPage({ params }: WritingPageProps) {
     notFound();
   }
 
+  const richSections = article.sections.filter(
+    (section): section is Extract<ArticleSection, { kind: "rich" }> => section.kind === "rich"
+  );
+  const articleUrl = `${siteUrl}/writing/${article.slug}`;
+  const publishedDate = getConfirmedPublicationDate(article);
+  const modifiedDate = getConfirmedModifiedDate(article);
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.title,
+    description: article.description,
+    url: articleUrl,
+    mainEntityOfPage: articleUrl,
+    datePublished: publishedDate,
+    dateModified: modifiedDate,
+    author: {
+      "@type": "Person",
+      name: article.author ?? profile.name,
+      url: siteUrl
+    },
+    publisher: {
+      "@type": "Person",
+      name: profile.name,
+      url: siteUrl
+    },
+    keywords: article.tags?.join(", "),
+    about: article.project,
+    citation: article.sourceCommitHref ?? article.sourceHref
+  };
+
   return (
     <main className="bg-white font-sans text-portfolio-ink">
       <section className="border-b border-portfolio-border bg-[radial-gradient(circle_at_top_right,rgba(23,105,255,0.1),transparent_34%),linear-gradient(180deg,#ffffff,#f7fbff)]">
         <div className={`${pageShell} py-8 sm:py-10 lg:py-12`}>
           <div className="flex flex-wrap items-center gap-2">
             <LinkButton href="/writing" variant="tertiary">
-              ← Engineering Notes
+              ← Engineering Insights
             </LinkButton>
             <Link
               className="inline-flex min-h-11 items-center justify-center rounded-md border border-transparent bg-transparent px-4 py-2 text-sm font-[600] leading-[1.35] text-portfolio-accent transition hover:bg-portfolio-atmosphere hover:text-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent"
@@ -157,7 +367,7 @@ export default async function WritingPage({ params }: WritingPageProps) {
               Portfolio
             </Link>
           </div>
-          <p className={`mt-8 ${lightMetadataLabel}`}>Engineering Note</p>
+          <p className={`mt-8 ${lightMetadataLabel}`}>Engineering Insight</p>
           <h1 className="mt-3 text-4xl font-[720] leading-tight tracking-normal text-[#050b2d] sm:text-5xl">
             {article.title}
           </h1>
@@ -165,6 +375,11 @@ export default async function WritingPage({ params }: WritingPageProps) {
             {article.subtitle}
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
+            {article.publishedAt ? (
+              <span className={`${lightMutedLabel} rounded-md border border-portfolio-border bg-white px-2.5 py-1.5`}>
+                {article.publicationDateProvisional ? "Provisional publication · " : "Published · "}{formatDate(article.publishedAt)}
+              </span>
+            ) : null}
             <span className={`${lightMutedLabel} rounded-md border border-portfolio-border bg-white px-2.5 py-1.5`}>
               {article.readingTime}
             </span>
@@ -176,8 +391,29 @@ export default async function WritingPage({ params }: WritingPageProps) {
       </section>
 
       <article className={`${pageShell} py-8 text-portfolio-body sm:py-10`}>
+        {richSections.length > 0 ? (
+          <nav aria-label="Article contents" className={`${cardSurface} mb-7 p-4 sm:p-5`}>
+            <p className={lightMetadataLabel}>In this article</p>
+            <ol className="mt-4 grid gap-x-6 gap-y-2 text-sm leading-6 sm:grid-cols-2">
+              {richSections.map((section) => (
+                <li key={section.id}>
+                  <a className="font-medium text-portfolio-body underline decoration-blue-200 underline-offset-4 hover:text-portfolio-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-portfolio-accent" href={`#${section.id}`}>
+                    {section.title}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        ) : null}
+
+        {article.disclaimer ? (
+          <aside className="mb-3 rounded-lg border border-slate-300 bg-slate-50 p-4 text-sm leading-7 text-portfolio-body sm:p-5">
+            <strong className="text-portfolio-ink">Implementation scope:</strong> {article.disclaimer}
+          </aside>
+        ) : null}
+
         {article.sections.map((section) => (
-          <ArticleSectionView section={section} key={section.title} />
+          <ArticleSectionView section={section} key={section.kind === "rich" ? section.id : section.title} />
         ))}
 
         <div className={`${cardSurface} mt-8 p-4 sm:p-5`}>
@@ -192,11 +428,25 @@ export default async function WritingPage({ params }: WritingPageProps) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              View Evidence Source
+              {article.sourceLabel ?? "View Evidence Source"}
             </Link>
+            {article.sourceCommitHref && article.sourceCommit ? (
+              <Link
+                className="inline-flex min-h-11 items-center justify-center rounded-md border border-portfolio-border bg-white px-4 py-2 text-sm font-[600] leading-[1.35] text-portfolio-ink transition hover:border-portfolio-accent hover:bg-portfolio-atmosphere focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-portfolio-accent"
+                href={article.sourceCommitHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Audited commit {article.sourceCommit.slice(0, 12)} ↗
+              </Link>
+            ) : null}
           </div>
         </div>
       </article>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
     </main>
   );
 }

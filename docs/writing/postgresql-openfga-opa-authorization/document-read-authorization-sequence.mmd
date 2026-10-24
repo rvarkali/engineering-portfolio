@@ -1,0 +1,20 @@
+flowchart TD
+    A["Client<br/>GET /api/v1/documents/{documentId}"]
+    B["Spring Security<br/>Validate JWT"]
+    C["PostgreSQL<br/>Resolve active principal"]
+    D["PostgreSQL<br/>Load resource and verify<br/>tenant eligibility"]
+    E["OpenFGA<br/>Evaluate computed can_view"]
+    F["OPA<br/>Evaluate contextual policy"]
+    G["200 OK<br/>Return document"]
+    H["Stop request<br/>No protected document returned"]
+    A --> B
+    B -->|"Valid JWT"| C
+    C -->|"Active principal"| D
+    D -->|"Eligible"| E
+    E -->|"ALLOW"| F
+    F -->|"ALLOW"| G
+    B -.->|"Invalid / missing JWT"| H
+    C -.->|"No eligible principal"| H
+    D -.->|"Missing / ineligible"| H
+    E -.->|"DENY / unavailable"| H
+    F -.->|"DENY / unavailable"| H

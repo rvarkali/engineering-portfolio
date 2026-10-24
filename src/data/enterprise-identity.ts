@@ -19,8 +19,8 @@ export const enterpriseIdentityCaseStudy: CaseStudy = {
     components: [
       "React + Keycloak: browser login through oidc-client-ts, Authorization Code + PKCE S256 and a public OIDC client.",
       "Nginx + Spring Boot: SPA delivery, human API proxying, JWT validation and application-level authorization enforcement.",
-      "PostgreSQL: internal principal mapping, active tenant membership, resource ownership and classification.",
-      "OpenFGA + OPA: independent API calls for relationship permissions and additional contextual policy, in that order."
+      "PostgreSQL: internal principal mapping, active tenant membership, resource existence, tenant association and classification.",
+      "OpenFGA + OPA: owner, editor and viewer relationships produce computed resource permissions before additional contextual policy, in that order."
     ],
     telemetry: []
   },

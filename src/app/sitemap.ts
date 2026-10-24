@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { caseStudies } from "@/data/case-studies";
 import { siteUrl } from "@/data/profile";
-import { articles } from "@/data/writing";
+import { articles, getConfirmedModifiedDate } from "@/data/writing";
 
 export const dynamic = "force-static";
 
@@ -25,11 +25,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.75
     },
-    ...articles.map((article) => ({
-      url: `${siteUrl}/writing/${article.slug}`,
-      lastModified: "2026-08-30",
-      changeFrequency: "monthly" as const,
-      priority: 0.7
-    }))
+    ...articles.map((article) => {
+      const lastModified = getConfirmedModifiedDate(article);
+
+      return {
+        url: `${siteUrl}/writing/${article.slug}`,
+        ...(lastModified ? { lastModified } : {}),
+        changeFrequency: "monthly" as const,
+        priority: 0.7
+      };
+    })
   ];
 }

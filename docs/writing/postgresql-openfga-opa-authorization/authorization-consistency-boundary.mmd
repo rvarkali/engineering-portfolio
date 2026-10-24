@@ -1,0 +1,23 @@
+flowchart TB
+    subgraph CURRENT["IMPLEMENTED — Current request path"]
+        API["Spring Boot<br/>Authorization enforcement"]
+        PG["PostgreSQL<br/>Principal, membership,<br/>resource and tenant facts"]
+        FGA["OpenFGA<br/>Owner / editor / viewer<br/>and computed permissions"]
+        OPA["OPA<br/>Contextual policy"]
+        API -->|"Authoritative facts<br/>and eligibility"| PG
+        API -->|"Relationship evaluation"| FGA
+        API -->|"Contextual evaluation<br/>after OpenFGA ALLOW"| OPA
+        PG -.-|"No shared transaction"| FGA
+    end
+    RISK["Possible cross-system<br/>stale-state window"]
+    PG -.-> RISK
+    FGA -.-> RISK
+    subgraph FUTURE["PROPOSED PRODUCTION IMPROVEMENTS — NOT IMPLEMENTED"]
+        OUTBOX["Transactional outbox<br/>or durable change record"]
+        WORKER["Idempotent relationship<br/>projection and reconciliation"]
+        OBS["Synchronization lag,<br/>failure and drift monitoring"]
+        OUTBOX --> WORKER
+        WORKER --> OBS
+    end
+    PG -.->|"Potential future<br/>change publication"| OUTBOX
+    WORKER -.->|"Potential future<br/>tuple updates"| FGA

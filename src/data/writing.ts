@@ -1,3 +1,64 @@
+import { postgresOpenFgaOpaAuthorizationArticle } from "./articles/postgresql-openfga-opa-authorization";
+
+export type ArticleDiagramAsset = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
+export type ArticleBlock =
+  | {
+      kind: "paragraph";
+      text: string;
+    }
+  | {
+      kind: "subheading";
+      title: string;
+    }
+  | {
+      kind: "list";
+      items: string[];
+      ordered?: boolean;
+    }
+  | {
+      kind: "code";
+      language: "java" | "rego" | "text";
+      code: string;
+      caption: string;
+      note?: string;
+      sourceHref?: string;
+      sourceLabel?: string;
+    }
+  | {
+      kind: "diagram";
+      asset: ArticleDiagramAsset;
+      caption: string;
+      lightboxTitle: string;
+    }
+  | {
+      kind: "table";
+      columns: string[];
+      rows: string[][];
+      caption?: string;
+    }
+  | {
+      kind: "callout";
+      label: string;
+      text: string;
+      tone?: "implementation" | "recommendation" | "limitation";
+    }
+  | {
+      kind: "reference";
+      label: string;
+      title: string;
+      href: string;
+      revisionLabel: string;
+      revision: string;
+      revisionHref: string;
+      text: string;
+    };
+
 export type ArticleSection =
   | {
       kind: "paragraphs";
@@ -16,6 +77,12 @@ export type ArticleSection =
       title: string;
       intro?: string;
       items: string[];
+    }
+  | {
+      kind: "rich";
+      id: string;
+      title: string;
+      blocks: ArticleBlock[];
     };
 
 export type Article = {
@@ -24,9 +91,18 @@ export type Article = {
   subtitle: string;
   description: string;
   readingTime: string;
+  publishedAt?: string;
+  modifiedAt?: string;
+  publicationDateProvisional?: boolean;
+  author?: string;
+  tags?: string[];
   project: string;
   caseStudyHref: string;
   sourceHref: string;
+  sourceLabel?: string;
+  sourceCommit?: string;
+  sourceCommitHref?: string;
+  disclaimer?: string;
   sections: ArticleSection[];
 };
 
@@ -134,9 +210,39 @@ export const articles = [
         ]
       }
     ]
-  }
+  },
+  postgresOpenFgaOpaAuthorizationArticle
 ] satisfies Article[];
 
 export function getArticle(slug: string) {
   return articles.find((article) => article.slug === slug);
+}
+
+export function getArticlesNewestFirst() {
+  // Dated entries precede undated entries; registry order is the stable fallback for equal or unknown dates.
+  return articles
+    .map((article, registryIndex) => ({
+      article,
+      registryIndex,
+      timestamp: article.publishedAt ? Date.parse(`${article.publishedAt}T00:00:00Z`) : null
+    }))
+    .sort((left, right) => {
+      if (left.timestamp !== null && right.timestamp !== null) {
+        return right.timestamp - left.timestamp || left.registryIndex - right.registryIndex;
+      }
+
+      if (left.timestamp !== null) return -1;
+      if (right.timestamp !== null) return 1;
+      return left.registryIndex - right.registryIndex;
+    })
+    .map(({ article }) => article);
+}
+
+export function getConfirmedPublicationDate(article: Article) {
+  return article.publicationDateProvisional ? undefined : article.publishedAt;
+}
+
+export function getConfirmedModifiedDate(article: Article) {
+  if (article.publicationDateProvisional) return undefined;
+  return article.modifiedAt ?? article.publishedAt;
 }
