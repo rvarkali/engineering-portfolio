@@ -1,3 +1,4 @@
+import { agentTrustZeroTrustMcpArticle } from "./articles/securing-ai-agents-zero-trust-mcp";
 import { postgresOpenFgaOpaAuthorizationArticle } from "./articles/postgresql-openfga-opa-authorization";
 
 export type ArticleDiagramAsset = {
@@ -95,7 +96,9 @@ export type Article = {
   modifiedAt?: string;
   publicationDateProvisional?: boolean;
   author?: string;
+  category?: string;
   tags?: string[];
+  heroImage?: ArticleDiagramAsset;
   project: string;
   caseStudyHref: string;
   sourceHref: string;
@@ -103,10 +106,12 @@ export type Article = {
   sourceCommit?: string;
   sourceCommitHref?: string;
   disclaimer?: string;
+  intro?: ArticleBlock[];
   sections: ArticleSection[];
 };
 
 export const articles = [
+  agentTrustZeroTrustMcpArticle,
   {
     slug: "for-update-missing-idempotency-key",
     title: "Why FOR UPDATE Does Not Protect a Missing Idempotency Key",

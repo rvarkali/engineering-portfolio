@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { LinkButton } from "@/components/LinkButton";
 import { getArticlesNewestFirst } from "@/data/writing";
 
@@ -68,7 +69,17 @@ export default function WritingIndexPage() {
         <div className="grid gap-4">
           {articles.map((article) => (
             <article className={`${cardSurface} p-4 sm:p-5`} key={article.slug}>
-              <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+              <div className={`grid gap-5 ${article.heroImage ? "lg:grid-cols-[18rem_1fr_auto]" : "lg:grid-cols-[1fr_auto]"} lg:items-center`}>
+                {article.heroImage ? (
+                  <Image
+                    alt={article.heroImage.alt}
+                    className="h-auto w-full rounded-md border border-blue-100"
+                    height={article.heroImage.height}
+                    sizes="(min-width: 1024px) 288px, 100vw"
+                    src={article.heroImage.src}
+                    width={article.heroImage.width}
+                  />
+                ) : null}
                 <div>
                   <p className={lightMetadataLabel}>
                     {article.publishedAt ? `${article.publicationDateProvisional ? "Provisional · " : ""}${formatDate(article.publishedAt)} · ` : ""}{article.readingTime}

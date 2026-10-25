@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 import { DiagramLightboxButton } from "@/components/DiagramLightboxButton";
 import { LinkButton } from "@/components/LinkButton";
 import { profile, siteUrl } from "@/data/profile";
@@ -26,6 +28,20 @@ const labelText = "text-xs font-semibold uppercase tracking-[0.16em]";
 const lightMetadataLabel = `${labelText} text-portfolio-accent`;
 const lightMutedLabel = `${labelText} text-portfolio-muted`;
 const bodyText = "text-base leading-8 text-portfolio-body";
+
+function renderInlineCode(text: string): ReactNode {
+  return text.split(/(`[^`]+`)/g).map((part, index) => {
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return (
+        <code className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[0.9em] text-slate-900" key={`${part}-${index}`}>
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+
+    return part;
+  });
+}
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -72,20 +88,29 @@ export async function generateMetadata({ params }: WritingPageProps): Promise<Me
       modifiedTime,
       authors: article.author ? [article.author] : undefined,
       tags: article.tags,
-      images: [
-        {
-          url: "/og.png",
-          width: 1200,
-          height: 630,
-          alt: "Ravinder Varkali Engineering Portfolio"
-        }
-      ]
+      images: article.heroImage
+        ? [
+            {
+              url: article.heroImage.src,
+              width: article.heroImage.width,
+              height: article.heroImage.height,
+              alt: article.heroImage.alt
+            }
+          ]
+        : [
+            {
+              url: "/og.png",
+              width: 1200,
+              height: 630,
+              alt: "Ravinder Varkali Engineering Portfolio"
+            }
+          ]
     },
     twitter: {
       card: "summary_large_image",
       title: article.title,
       description: article.description,
-      images: ["/og.png"]
+      images: [article.heroImage?.src ?? "/og.png"]
     }
   };
 }
@@ -97,7 +122,7 @@ function ParagraphSection({ section }: { section: Extract<ArticleSection, { kind
       <div className="mt-4 space-y-4">
         {section.paragraphs.map((paragraph) => (
           <p className={bodyText} key={paragraph}>
-            {paragraph}
+            {renderInlineCode(paragraph)}
           </p>
         ))}
       </div>
@@ -109,7 +134,7 @@ function SequenceSection({ section }: { section: Extract<ArticleSection, { kind:
   return (
     <section className="py-7 sm:py-8">
       <h2 className="text-2xl font-[620] leading-tight text-portfolio-ink">{section.title}</h2>
-      <p className={`mt-4 ${bodyText}`}>{section.intro}</p>
+      <p className={`mt-4 ${bodyText}`}>{renderInlineCode(section.intro)}</p>
       <div className={`${cardSurface} mt-5 overflow-hidden`}>
         <div className="grid grid-cols-2 border-b border-portfolio-border bg-portfolio-atmosphere">
           <div className={`${lightMetadataLabel} p-3 sm:p-4`}>Transaction A</div>
@@ -130,7 +155,7 @@ function SequenceSection({ section }: { section: Extract<ArticleSection, { kind:
           ))}
         </div>
       </div>
-      <p className={`mt-5 ${bodyText}`}>{section.outro}</p>
+      <p className={`mt-5 ${bodyText}`}>{renderInlineCode(section.outro)}</p>
     </section>
   );
 }
@@ -139,12 +164,12 @@ function ListSection({ section }: { section: Extract<ArticleSection, { kind: "li
   return (
     <section className="py-7 sm:py-8">
       <h2 className="text-2xl font-[620] leading-tight text-portfolio-ink">{section.title}</h2>
-      {section.intro ? <p className={`mt-4 ${bodyText}`}>{section.intro}</p> : null}
+      {section.intro ? <p className={`mt-4 ${bodyText}`}>{renderInlineCode(section.intro)}</p> : null}
       <ul className="mt-4 space-y-3">
         {section.items.map((item) => (
           <li className="flex gap-3 text-base leading-7 text-portfolio-body" key={item}>
             <span className="mt-3 h-1.5 w-1.5 shrink-0 rounded-full bg-portfolio-accent" />
-            <span>{item}</span>
+            <span>{renderInlineCode(item)}</span>
           </li>
         ))}
       </ul>
@@ -157,7 +182,7 @@ function ArticleList({ block }: { block: Extract<ArticleBlock, { kind: "list" }>
   return (
     <List className={`${block.ordered ? "list-decimal" : "list-disc"} space-y-3 pl-6 text-base leading-8 text-portfolio-body marker:font-semibold marker:text-portfolio-accent`}>
       {block.items.map((item) => (
-        <li className="pl-1" key={item}>{item}</li>
+        <li className="pl-1" key={item}>{renderInlineCode(item)}</li>
       ))}
     </List>
   );
@@ -221,7 +246,7 @@ function ArticleTable({ block }: { block: Extract<ArticleBlock, { kind: "table" 
             {block.rows.map((row, rowIndex) => (
               <tr className="align-top" key={`${row[0]}-${rowIndex}`}>
                 {row.map((cell, cellIndex) => (
-                  <td className={`px-4 py-3 sm:px-5 ${cellIndex === 0 ? "font-medium text-portfolio-ink" : ""}`} key={`${cell}-${cellIndex}`}>{cell}</td>
+                  <td className={`px-4 py-3 sm:px-5 ${cellIndex === 0 ? "font-medium text-portfolio-ink" : ""}`} key={`${cell}-${cellIndex}`}>{renderInlineCode(cell)}</td>
                 ))}
               </tr>
             ))}
@@ -243,7 +268,7 @@ function ArticleCallout({ block }: { block: Extract<ArticleBlock, { kind: "callo
   return (
     <aside className={`rounded-lg border p-4 sm:p-5 ${toneClass}`}>
       <p className={lightMetadataLabel}>{block.label}</p>
-      <p className="mt-2 text-sm leading-7 text-portfolio-body sm:text-base">{block.text}</p>
+      <p className="mt-2 text-sm leading-7 text-portfolio-body sm:text-base">{renderInlineCode(block.text)}</p>
     </aside>
   );
 }
@@ -269,14 +294,14 @@ function ArticleReference({ block }: { block: Extract<ArticleBlock, { kind: "ref
       >
         {block.revision} ↗
       </Link>
-      <p className="mt-4 text-sm leading-7 text-portfolio-body sm:text-base">{block.text}</p>
+      <p className="mt-4 text-sm leading-7 text-portfolio-body sm:text-base">{renderInlineCode(block.text)}</p>
     </aside>
   );
 }
 
-function ArticleBlockView({ block }: { block: ArticleBlock }) {
-  if (block.kind === "paragraph") return <p className={bodyText}>{block.text}</p>;
-  if (block.kind === "subheading") return <h3 className="pt-2 text-xl font-[620] leading-tight text-portfolio-ink">{block.title}</h3>;
+function ArticleBlockView({ block, compact = false }: { block: ArticleBlock; compact?: boolean }) {
+  if (block.kind === "paragraph") return <p className={bodyText}>{renderInlineCode(block.text)}</p>;
+  if (block.kind === "subheading") return <h3 className={`${compact ? "pt-1" : "pt-2"} text-xl font-[620] leading-tight text-portfolio-ink`}>{block.title}</h3>;
   if (block.kind === "list") return <ArticleList block={block} />;
   if (block.kind === "code") return <ArticleCode block={block} />;
   if (block.kind === "diagram") return <ArticleDiagram block={block} />;
@@ -286,12 +311,14 @@ function ArticleBlockView({ block }: { block: ArticleBlock }) {
 }
 
 function RichSection({ section }: { section: Extract<ArticleSection, { kind: "rich" }> }) {
+  const compact = section.id === "engineering-lessons";
+
   return (
     <section className="scroll-mt-24 py-7 sm:py-9" id={section.id}>
       <h2 className="text-2xl font-[650] leading-tight text-portfolio-ink sm:text-3xl">{section.title}</h2>
-      <div className="mt-5 space-y-5">
+      <div className={`mt-5 ${compact ? "space-y-4" : "space-y-[1.1rem]"}`}>
         {section.blocks.map((block, index) => (
-          <ArticleBlockView block={block} key={`${block.kind}-${index}`} />
+          <ArticleBlockView block={block} compact={compact} key={`${block.kind}-${index}`} />
         ))}
       </div>
     </section>
@@ -349,7 +376,8 @@ export default async function WritingPage({ params }: WritingPageProps) {
     },
     keywords: article.tags?.join(", "),
     about: article.project,
-    citation: article.sourceCommitHref ?? article.sourceHref
+    citation: article.sourceCommitHref ?? article.sourceHref,
+    image: article.heroImage ? `${siteUrl}${article.heroImage.src}` : undefined
   };
 
   return (
@@ -384,9 +412,22 @@ export default async function WritingPage({ params }: WritingPageProps) {
               {article.readingTime}
             </span>
             <span className={`${lightMutedLabel} rounded-md border border-portfolio-border bg-white px-2.5 py-1.5`}>
-              {article.project}
+              {article.category ?? article.project}
             </span>
           </div>
+          {article.heroImage ? (
+            <div className="mt-8 overflow-hidden rounded-lg border border-blue-100 bg-slate-950 shadow-[0_18px_60px_rgba(15,45,88,0.12)]">
+              <Image
+                alt={article.heroImage.alt}
+                className="h-auto w-full"
+                height={article.heroImage.height}
+                priority
+                sizes="(min-width: 896px) 896px, 100vw"
+                src={article.heroImage.src}
+                width={article.heroImage.width}
+              />
+            </div>
+          ) : null}
         </div>
       </section>
 
@@ -410,6 +451,14 @@ export default async function WritingPage({ params }: WritingPageProps) {
           <aside className="mb-3 rounded-lg border border-slate-300 bg-slate-50 p-4 text-sm leading-7 text-portfolio-body sm:p-5">
             <strong className="text-portfolio-ink">Implementation scope:</strong> {article.disclaimer}
           </aside>
+        ) : null}
+
+        {article.intro ? (
+          <section aria-label="Article introduction" className="space-y-[1.1rem] py-7 sm:py-8">
+            {article.intro.map((block, index) => (
+              <ArticleBlockView block={block} key={`${block.kind}-${index}`} />
+            ))}
+          </section>
         ) : null}
 
         {article.sections.map((section) => (

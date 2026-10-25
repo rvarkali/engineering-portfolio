@@ -875,6 +875,11 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
                 <LinkButton href={caseStudy.repositoryUrl} newTab variant="primary">
                   View Public SDK ↗
                 </LinkButton>
+                {caseStudy.articleHref ? (
+                  <LinkButton href={caseStudy.articleHref}>
+                    Read Engineering Insight →
+                  </LinkButton>
+                ) : null}
                 <LinkButton href={docsHref} newTab>
                   Read Threat Model →
                 </LinkButton>
@@ -1054,6 +1059,11 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
             <h2 className="mt-2 text-2xl font-[720] leading-tight text-[#050b2d]">Get started with AgentTrust</h2>
           </div>
           <div className="flex flex-wrap gap-3">
+            {caseStudy.articleHref ? (
+              <LinkButton href={caseStudy.articleHref} variant="primary">
+                Read Engineering Insight →
+              </LinkButton>
+            ) : null}
             <LinkButton href={caseStudy.repositoryUrl} newTab variant="primary">
               View Public SDK ↗
             </LinkButton>

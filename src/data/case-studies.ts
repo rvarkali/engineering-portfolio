@@ -75,6 +75,7 @@ export type CaseStudy = {
   eyebrow: string;
   summary: string;
   repositoryUrl: string;
+  articleHref?: string;
   stack: string[];
   demonstrates: CapabilityGroup[];
   problem: string;
@@ -518,6 +519,7 @@ export const caseStudies = [
     summary:
       "Identity, independently enforced authorization, MCP tool protection, audit evidence, and observability for AI-agent execution.",
     repositoryUrl: agentTrustRepositoryUrl,
+    articleHref: "/writing/securing-ai-agents-zero-trust-mcp",
     stack: [
       "Python",
       "Go",
