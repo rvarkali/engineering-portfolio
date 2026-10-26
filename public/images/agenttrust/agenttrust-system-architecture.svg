@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1774" height="887" viewBox="0 0 1774 887" role="img" aria-labelledby="title description">
+  <title id="title">AgentTrust system architecture</title>
+  <desc id="description">An external issuer signs run identity for an AI agent using the public SDK. The independent Go Gateway verifies identity, resolves trusted tool mappings, exact-scope authorizes, records audit evidence, and dispatches only authorized requests to protected MCP tools. A read-only Console projects audit evidence.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef6ff"/>
+    </linearGradient>
+    <linearGradient id="gateway" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f66f6"/>
+      <stop offset="1" stop-color="#063dba"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="10" stdDeviation="16" flood-color="#123a70" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1769ff"/>
+    </marker>
+    <marker id="arrowSlate" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#526985"/>
+    </marker>
+    <style>
+      .title{font:700 42px Inter,ui-sans-serif,system-ui,sans-serif;fill:#07123f}.subtitle{font:400 20px Inter,ui-sans-serif,system-ui,sans-serif;fill:#55709e}.card-title{font:700 22px Inter,ui-sans-serif,system-ui,sans-serif;fill:#07123f}.card-copy{font:400 16px Inter,ui-sans-serif,system-ui,sans-serif;fill:#526985}.small{font:600 14px Inter,ui-sans-serif,system-ui,sans-serif;fill:#234a82}.label{font:700 13px Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:1.5px;fill:#1769ff}.white-title{font:700 25px Inter,ui-sans-serif,system-ui,sans-serif;fill:#fff}.white-copy{font:400 16px Inter,ui-sans-serif,system-ui,sans-serif;fill:#e7f0ff}.arrow-label{font:700 14px Inter,ui-sans-serif,system-ui,sans-serif;fill:#1769ff}.mono{font:600 14px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#173e75}
+    </style>
+  </defs>
+  <rect width="1774" height="887" rx="28" fill="url(#background)"/>
+  <circle cx="1600" cy="90" r="250" fill="#dcebff" opacity="0.38"/>
+  <circle cx="150" cy="780" r="260" fill="#e5f1ff" opacity="0.48"/>
+
+  <text x="887" y="62" text-anchor="middle" class="title">AgentTrust System Architecture</text>
+  <text x="887" y="96" text-anchor="middle" class="subtitle">Cooperative SDK controls and an independent Gateway enforcement boundary</text>
+
+  <!-- Issuer -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="145" width="285" height="150" rx="18" fill="#fff" stroke="#b9d6ff" stroke-width="2"/>
+  </g>
+  <rect x="92" y="168" width="48" height="48" rx="12" fill="#e8f2ff"/>
+  <circle cx="112" cy="192" r="8" fill="none" stroke="#1769ff" stroke-width="5"/>
+  <path d="M120 192h15m-5 0v8m-7-8v6" stroke="#1769ff" stroke-width="5" stroke-linecap="round"/>
+  <text x="155" y="184" class="label">EXTERNAL TRUST</text>
+  <text x="155" y="213" class="card-title">JWT Identity Issuer</text>
+  <text x="92" y="248" class="card-copy">Signs expiring Ed25519 run identity</text>
+  <text x="92" y="272" class="card-copy">Private signing authority stays outside Gateway</text>
+
+  <!-- Agent -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="375" width="285" height="220" rx="18" fill="#fff" stroke="#b9d6ff" stroke-width="2"/>
+  </g>
+  <rect x="92" y="398" width="48" height="48" rx="12" fill="#e8f2ff"/>
+  <circle cx="116" cy="416" r="8" fill="#1769ff"/>
+  <path d="M100 438c2-12 10-17 16-17s14 5 16 17" fill="#1769ff"/>
+  <text x="155" y="413" class="label">CALLER</text>
+  <text x="155" y="442" class="card-title">AI Agent</text>
+  <text x="92" y="480" class="card-copy">Requests a logical tool</text>
+  <text x="92" y="507" class="card-copy">Presents externally issued JWT</text>
+  <text x="92" y="534" class="card-copy">Supplies request correlation metadata</text>
+  <rect x="92" y="552" width="235" height="25" rx="7" fill="#f1f6fd"/>
+  <text x="105" y="570" class="mono">request_id ≠ lifecycle key</text>
+
+  <!-- SDK -->
+  <g filter="url(#shadow)">
+    <rect x="420" y="375" width="280" height="220" rx="18" fill="#fff" stroke="#b9d6ff" stroke-width="2"/>
+  </g>
+  <rect x="442" y="398" width="48" height="48" rx="12" fill="#e8f2ff"/>
+  <path d="M454 412h24v22h-24zM460 406v8m12-8v8m-12 20v7m12-7v7" fill="none" stroke="#1769ff" stroke-width="4" stroke-linecap="round"/>
+  <text x="505" y="413" class="label">PUBLIC INTEGRATION</text>
+  <text x="505" y="442" class="card-title">Python SDK / Client</text>
+  <text x="442" y="480" class="card-copy">Typed sync and async interfaces</text>
+  <text x="442" y="507" class="card-copy">MCP and LangChain adapters</text>
+  <text x="442" y="534" class="card-copy">Transports Gateway credentials</text>
+  <text x="442" y="561" class="card-copy">Does not verify Gateway JWT cryptography</text>
+
+  <!-- Trusted config -->
+  <g filter="url(#shadow)">
+    <rect x="770" y="132" width="400" height="155" rx="18" fill="#fff" stroke="#a9cdfd" stroke-width="2"/>
+  </g>
+  <text x="794" y="163" class="label">TRUSTED OPERATOR CONFIGURATION</text>
+  <text x="794" y="195" class="card-title">Tool → route → exact scope</text>
+  <text x="794" y="226" class="mono">service_status  → service.status</text>
+  <text x="794" y="253" class="mono">restart_service → service.restart</text>
+
+  <!-- Gateway -->
+  <g filter="url(#shadow)">
+    <rect x="770" y="340" width="400" height="300" rx="22" fill="url(#gateway)"/>
+  </g>
+  <text x="798" y="378" class="label" style="fill:#bcd6ff">INDEPENDENT ENFORCEMENT BOUNDARY</text>
+  <text x="798" y="416" class="white-title">Go Authorization Gateway</text>
+  <text x="798" y="454" class="white-copy">✓ Verify Ed25519 JWT signature + required claims</text>
+  <text x="798" y="486" class="white-copy">✓ Resolve trusted tool metadata and route</text>
+  <text x="798" y="518" class="white-copy">✓ Compare exact required scope</text>
+  <text x="798" y="550" class="white-copy">✓ Persist required evidence before dispatch</text>
+  <text x="798" y="582" class="white-copy">✓ Bounded HTTP / stateless MCP execution</text>
+  <text x="798" y="614" class="white-copy">OTel spans · W3C propagation · metrics</text>
+
+  <!-- Protected tools -->
+  <g filter="url(#shadow)">
+    <rect x="1240" y="340" width="465" height="300" rx="20" fill="#fff" stroke="#b9d6ff" stroke-width="2"/>
+  </g>
+  <text x="1268" y="378" class="label">PROTECTED NETWORK</text>
+  <text x="1268" y="416" class="card-title">Configured MCP Tools</text>
+  <text x="1268" y="448" class="card-copy">Supported stateless JSON tools/call subset</text>
+  <rect x="1268" y="477" width="408" height="58" rx="12" fill="#eef7ff" stroke="#c7ddff"/>
+  <text x="1290" y="502" class="mono">operation  service_status</text>
+  <text x="1290" y="525" class="small">permission  service.status</text>
+  <rect x="1268" y="548" width="408" height="58" rx="12" fill="#fff4f4" stroke="#ffd0d0"/>
+  <text x="1290" y="573" class="mono">operation  restart_service</text>
+  <text x="1290" y="596" class="small">permission  service.restart</text>
+  <text x="1268" y="625" class="card-copy">Synthetic demonstration operations</text>
+
+  <!-- Audit -->
+  <g filter="url(#shadow)">
+    <rect x="770" y="690" width="400" height="145" rx="18" fill="#fff" stroke="#b9d6ff" stroke-width="2"/>
+  </g>
+  <text x="794" y="722" class="label">STRUCTURED AUDIT EVIDENCE</text>
+  <text x="794" y="754" class="card-title">Four-stage invocation lifecycle</text>
+  <text x="794" y="784" class="mono">group by invocation_id</text>
+  <text x="794" y="812" class="card-copy">Local JSONL; not immutable or tamper-proof</text>
+
+  <!-- Console -->
+  <g filter="url(#shadow)">
+    <rect x="1240" y="690" width="465" height="145" rx="18" fill="#fff" stroke="#b9d6ff" stroke-width="2"/>
+  </g>
+  <text x="1268" y="722" class="label">EVIDENCE CONSUMER</text>
+  <text x="1268" y="754" class="card-title">Read-Only AgentTrust Console</text>
+  <text x="1268" y="784" class="card-copy">Projects incomplete and conflicting evidence safely</text>
+  <text x="1268" y="812" class="card-copy">No tool execution · no policy edits · no auth/RBAC</text>
+
+  <!-- Assumption -->
+  <rect x="70" y="690" width="630" height="145" rx="18" fill="#fff8f8" stroke="#ffcaca" stroke-width="2"/>
+  <text x="94" y="722" class="label" style="fill:#bf2a2a">ENFORCEMENT ASSUMPTION</text>
+  <text x="94" y="754" class="card-title">Protected tools are unreachable by the agent</text>
+  <text x="94" y="786" class="card-copy">Independent mediation depends on deployment topology and trusted</text>
+  <text x="94" y="812" class="card-copy">operator configuration preventing a direct upstream bypass.</text>
+
+  <!-- Connections -->
+  <path d="M212 295v63" stroke="#1769ff" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
+  <text x="226" y="331" class="arrow-label">signed JWT</text>
+  <path d="M355 485h50" stroke="#1769ff" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
+  <path d="M700 485h55" stroke="#1769ff" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
+  <text x="716" y="467" class="arrow-label">TLS</text>
+  <path d="M970 287v38" stroke="#526985" stroke-width="3" stroke-dasharray="7 7" fill="none" marker-end="url(#arrowSlate)"/>
+  <path d="M1170 485h55" stroke="#1769ff" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
+  <text x="1180" y="466" class="arrow-label">ALLOW</text>
+  <path d="M970 640v35" stroke="#526985" stroke-width="3" fill="none" marker-end="url(#arrowSlate)"/>
+  <path d="M1170 762h55" stroke="#526985" stroke-width="3" fill="none" marker-end="url(#arrowSlate)"/>
+</svg>

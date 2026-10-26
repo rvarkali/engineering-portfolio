@@ -720,7 +720,7 @@ function CompactScopeList({ items }: { items: string[] }) {
 function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
   const primaryFlow = caseStudy.requestFlows[0];
   const docsHref = `${caseStudy.repositoryUrl}/blob/main/docs/threat-model.md`;
-  const evidenceHref = caseStudy.evidence?.sourceUrl ?? `${caseStudy.repositoryUrl}/blob/main/docs/evidence/README.md`;
+  const evidenceHref = caseStudy.evidence?.sourceUrl ?? `${caseStudy.repositoryUrl}/blob/main/docs/mvp-overview.md`;
   const heroHighlights = [
     {
       label: "SDK",
@@ -735,7 +735,7 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
     {
       label: "Audit",
       title: "Lifecycle evidence",
-      detail: "Authorization decisions and execution results correlate by request_id."
+      detail: "Gateway-generated invocation_id groups four audit stages; request_id remains reusable correlation."
     },
     {
       label: "Obs",
@@ -743,22 +743,22 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
       detail: "Traces, metrics, logs, and audit evidence distinguish ALLOW from DENY."
     }
   ];
-  const capabilityGroups = [
+  const contributionGroups = [
     {
-      title: "Agent Identity",
-      items: ["short-lived run identity", "Ed25519 JWT verification", "agent/run/token correlation"]
+      title: "SDK Interfaces",
+      items: ["typed sync and async clients", "cooperative local guards", "explicit MCP and LangChain adapters"]
     },
     {
-      title: "Tool Authorization",
-      items: ["exact required-scope checks", "deny-by-default unknown tools", "out-of-scope calls blocked"]
+      title: "Gateway Enforcement",
+      items: ["Ed25519 JWT verification", "trusted routing and exact scopes", "required evidence before dispatch"]
     },
     {
-      title: "Gateway Routing",
-      items: ["trusted MCP endpoint", "configured tool mapping", "caller cannot override scope"]
+      title: "Conservative Outcomes",
+      items: ["authorization separated from execution", "four canonical execution states", "no assumed-safe retry for UNKNOWN"]
     },
     {
-      title: "Evidence",
-      items: ["audit lifecycle", "OpenTelemetry traces", "Prometheus-compatible metrics"]
+      title: "Verification",
+      items: ["cross-repository candidate checks", "read-only Console projection", "isolated Docker route enforcement"]
     }
   ];
   const decisionCards = [
@@ -774,7 +774,7 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
       tradeoff: "The gateway is stronger only when topology prevents direct protected-upstream access."
     },
     "Ed25519 signed run identity": {
-      decision: "Verify short-lived JWTs with issuer, agent ID, audience, run ID, scopes, issue time, expiry, and token ID.",
+      decision: "Verify externally issued Ed25519 JWTs with issuer, agent ID, audience, run ID, scopes, issue time, expiry, and token ID.",
       why: "The gateway should not share a symmetric signing secret with the identity issuer.",
       tradeoff: "Public-key verification reduces gateway secret exposure; production key rotation remains future work."
     },
@@ -784,36 +784,22 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
       tradeoff: "Determinism improves; wildcard, prefix, inheritance, and case-folding convenience is excluded."
     },
     "Lifecycle audit evidence": {
-      decision: "Emit authorization_decision and execution_result records correlated by request_id.",
-      why: "Console consumption should not guess semantics from nullable fields.",
-      tradeoff: "Local JSONL is easy to inspect, but not durable, immutable, or tamper-proof."
+      decision: "Group receipt, authorization, dispatch-intent, and terminal evidence by Gateway-generated invocation_id.",
+      why: "The Console must distinguish separate invocations and must not infer success from ALLOW or missing evidence.",
+      tradeoff: "request_id remains reusable correlation; local JSONL is neither durable, immutable, nor tamper-proof."
     }
   };
-  const integrations = [
-    {
-      title: "MCP gateway adapter",
-      detail: "Narrow MCP 2026-07-28 stateless HTTP tools/call adapter; no discovery or generalized MCP proxying."
-    },
-    {
-      title: "SDK adapters",
-      detail: "MCP and LangChain wrappers keep cooperative framework integration on the same authorization path."
-    },
-    {
-      title: "Protected routing",
-      detail: "Gateway config chooses MCP destination, tool name, required scope, timeout, and trusted headers."
-    }
-  ];
   const currentScope = [
     "Public SDK for cooperative in-process enforcement.",
     "Separately maintained gateway implementation for independently enforced MCP authorization.",
-    "Short-lived signed run identities with scoped claims.",
-    "Local JSONL audit lifecycle and operational telemetry."
+    "Expiring externally issued Ed25519 JWTs with scoped claims in Gateway mode.",
+    "Four-stage JSONL audit lifecycle, read-only Console projection, and Gateway telemetry."
   ];
   const outsideScope = [
-    "Production SaaS, tenant administration, SSO/RBAC, or policy editing UI.",
-    "Durable centralized or tamper-proof audit storage.",
-    "Dynamic MCP discovery or universal MCP transport gateway.",
-    "Guaranteed enforcement if protected upstreams are directly reachable outside the gateway."
+    "Production SaaS, commercial licensing readiness, or production-scale reliability certification.",
+    "Multi-tenant isolation, enterprise identity lifecycle, managed key rotation, or revocation.",
+    "Durable, immutable audit storage; Console authentication/RBAC; or policy editing controls.",
+    "Universal MCP transports or guaranteed enforcement when protected upstreams can bypass the gateway."
   ];
   const flagshipScenario = [
     {
@@ -829,9 +815,49 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
     {
       label: "DENY",
       title: "restart_service",
-      detail: "requires service.restart -> not_executed -> MCP invocation count = 0"
+      detail: "requires service.restart -> NOT_EXECUTED -> MCP invocation count = 0"
     }
   ];
+  const enforcementModes = [
+    {
+      eyebrow: "Cooperative Local SDK Mode",
+      title: "Developer-facing controls inside the host process",
+      items: [
+        "Local agent registry and policy configuration.",
+        "Symmetric-token facilities for the cooperative local mode.",
+        "Guarded direct, async, MCP, and LangChain calls.",
+        "Not an independent boundary against compromised host code or direct tool access."
+      ]
+    },
+    {
+      eyebrow: "Independent Gateway Mode",
+      title: "External mediation before protected dispatch",
+      items: [
+        "Gateway-side verification of externally issued Ed25519-signed JWTs.",
+        "Trusted tool routing and exact required-scope authorization.",
+        "Mandatory audit evidence before transport handoff.",
+        "Independent enforcement only when deployment topology prevents direct upstream bypass."
+      ]
+    }
+  ];
+  const auditStages = [
+    ["1", "invocation_received", "Gateway assigns invocation_id and persists receipt before authentication."],
+    ["2", "authorization_decision", "Authentication, trusted resolution, and exact-scope evaluation produce ALLOW, DENY, or UNKNOWN."],
+    ["3", "execution_attempted", "Required dispatch-intent evidence is persisted immediately before transport handoff."],
+    ["4", "execution_result", "Terminal evidence records the observed outcome when it can be established safely."]
+  ];
+  const executionOutcomes = [
+    ["SUCCEEDED", "A valid successful application result was observed.", "emerald"],
+    ["FAILED", "A complete, confirmed application-level failure was observed.", "red"],
+    ["NOT_EXECUTED", "Authorization or another pre-dispatch gate prevented handoff.", "slate"],
+    ["UNKNOWN", "Dispatch may have occurred, but the final state cannot be established safely.", "amber"]
+  ] as const;
+  const outcomeToneClasses = {
+    emerald: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    red: "border-red-200 bg-red-50 text-red-800",
+    slate: "border-slate-200 bg-slate-50 text-slate-700",
+    amber: "border-amber-200 bg-amber-50 text-amber-800"
+  };
 
   return (
     <main className="bg-white font-sans text-portfolio-ink">
@@ -844,12 +870,9 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
             <nav className="hidden items-center gap-6 text-sm font-[620] text-slate-600 md:flex" aria-label="Case study sections">
               <a className="hover:text-portfolio-accent" href="#overview">Overview</a>
               <a className="hover:text-portfolio-accent" href="#system-architecture">Architecture</a>
-              <a className="hover:text-portfolio-accent" href="#decisions">Decisions</a>
+              <a className="hover:text-portfolio-accent" href="#audit-lifecycle">Audit Model</a>
               <a className="hover:text-portfolio-accent" href="#evidence">Evidence</a>
             </nav>
-            <LinkButton href={caseStudy.repositoryUrl} newTab variant="primary">
-              View Public SDK ↗
-            </LinkButton>
           </div>
 
           <div id="overview" className="mt-10 grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
@@ -877,7 +900,7 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
                 </LinkButton>
                 {caseStudy.articleHref ? (
                   <LinkButton href={caseStudy.articleHref}>
-                    Read Engineering Insight →
+                    Read the Zero Trust MCP article →
                   </LinkButton>
                 ) : null}
                 <LinkButton href={docsHref} newTab>
@@ -905,12 +928,12 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
         </div>
       </section>
 
-      <LightSection id="system-architecture" eyebrow="System Architecture" title="End-to-end architecture for least-privilege agent tool execution." description="AgentTrust uses two complementary layers: the public SDK provides developer-facing, cooperative in-process controls, while the gateway provides an independently enforced authorization point before protected MCP execution.">
+      <LightSection id="system-architecture" eyebrow="System Architecture" title="Architecture for least-privilege agent tool execution." description="AgentTrust combines a cooperative public SDK with an independent Gateway boundary, trusted tool configuration, structured audit evidence, and a read-only Console.">
         <div>
           <DiagramLightboxButton
             asset={{
-              src: "/images/agenttrust/agenttrust-system-architecture.png",
-              alt: "AgentTrust system architecture showing the AI application, public SDK, independent gateway enforcement boundary, protected MCP tools, and cross-cutting logs, traces, metrics, and audit evidence.",
+              src: "/images/agenttrust/agenttrust-system-architecture.svg",
+              alt: "AgentTrust system architecture showing an external JWT issuer, AI agent, public SDK client, independent Go authorization gateway, trusted tool-to-scope configuration, protected MCP tools, structured audit evidence, read-only Console, and Gateway observability.",
               width: 1774,
               height: 887
             }}
@@ -918,26 +941,78 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
             priority
             sizes="(min-width: 1152px) 1152px, 100vw"
           />
+          <div className="mt-3 flex justify-end">
+            <Link
+              aria-label="View full-size AgentTrust system architecture diagram"
+              className="rounded-sm text-sm font-bold text-portfolio-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-portfolio-accent focus-visible:ring-offset-2"
+              href="/images/agenttrust/agenttrust-system-architecture.svg"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View full-size diagram ↗
+            </Link>
+          </div>
           <p className="mt-3 rounded-md border border-blue-100 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
-            SDK-level cooperative controls are complemented by an independently enforced gateway that reaches protected MCP tools only after authorization.
+            The public SDK transports Gateway credentials but does not perform the Gateway&apos;s cryptographic verification. Protected upstreams must remain unreachable outside the Gateway for independent enforcement.
           </p>
         </div>
-        <p className="mt-5 max-w-3xl text-sm leading-7 text-slate-600">
-          Independent enforcement assumes deployment topology prevents untrusted agents from directly bypassing the gateway and reaching protected upstreams.
-        </p>
       </LightSection>
 
-      <LightSection id="tool-execution-flow" eyebrow="Tool Execution Flow" title="How a protected tool request moves through AgentTrust." description="A protected request is authenticated, resolved against trusted tool configuration, and exact-scope authorized before MCP execution. DENY terminates before the protected tool is invoked.">
+      <LightSection id="implemented-components" eyebrow="Implemented Components" title="Two enforcement modes, with different trust boundaries." description="The local SDK and independent Gateway are complementary modes. Their security properties are deliberately described separately.">
+        <div className="grid gap-4 lg:grid-cols-2">
+          {enforcementModes.map((mode) => (
+            <LightDetailPanel eyebrow={mode.eyebrow} items={mode.items} key={mode.eyebrow} title={mode.title} />
+          ))}
+        </div>
+      </LightSection>
+
+      <LightSection id="tool-execution-flow" eyebrow="Protected Execution Flow" title="Authorization and execution are separate outcomes." description="The Gateway records required evidence before transport handoff. DENY terminates without execution_attempted or a protected tool call; ALLOW permits dispatch but never guarantees success.">
         <DiagramLightboxButton
           asset={{
-            src: "/images/agenttrust/agenttrust-tool-execution-flow.png",
-            alt: "AgentTrust protected tool execution flow showing request identification, Ed25519 JWT verification, trusted tool resolution, exact-scope authorization, ALLOW execution through MCP, and DENY termination with no MCP invocation.",
+            src: "/images/agenttrust/agenttrust-tool-execution-flow.svg",
+            alt: "AgentTrust protected execution flow showing Gateway-generated invocation identity, required receipt audit, JWT authentication, trusted tool resolution, exact-scope authorization, decision audit, denied-request termination, required dispatch-intent audit, configured MCP tools/call execution, and canonical execution outcomes.",
             width: 1774,
             height: 887
           }}
           lightboxTitle="AgentTrust Tool Execution Flow"
           sizes="(min-width: 1152px) 1152px, 100vw"
         />
+        <div className="mt-3 flex justify-end">
+          <Link
+            aria-label="View full-size AgentTrust protected execution flow diagram"
+            className="rounded-sm text-sm font-bold text-portfolio-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-portfolio-accent focus-visible:ring-offset-2"
+            href="/images/agenttrust/agenttrust-tool-execution-flow.svg"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View full-size diagram ↗
+          </Link>
+        </div>
+      </LightSection>
+
+      <LightSection id="audit-lifecycle" eyebrow="Audit Lifecycle And Outcomes" title="Four stages prevent ALLOW from being mistaken for success." description="The Console groups lifecycle evidence only by Gateway-generated invocation_id. request_id remains reusable correlation metadata, so multiple protected invocations may share it.">
+        <div className="grid gap-3 lg:grid-cols-4">
+          {auditStages.map(([number, stage, detail]) => (
+            <article className="rounded-lg border border-blue-100 bg-white p-5 shadow-[0_10px_35px_rgba(15,45,88,0.06)]" key={stage}>
+              <div className="flex items-center gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-blue-600 text-sm font-bold text-white">{number}</span>
+                <h3 className="font-mono text-sm font-bold text-[#050b2d]">{stage}</h3>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-slate-600">{detail}</p>
+            </article>
+          ))}
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          {executionOutcomes.map(([status, meaning, tone]) => (
+            <article className={`rounded-lg border p-4 ${outcomeToneClasses[tone]}`} key={status}>
+              <h3 className="text-sm font-bold">{status}</h3>
+              <p className="mt-2 text-sm leading-6">{meaning}</p>
+            </article>
+          ))}
+        </div>
+        <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+          UNKNOWN is deliberately conservative: execution may have crossed the dispatch boundary, so an automatic retry could duplicate side effects.
+        </p>
       </LightSection>
 
       <LightSection id="security-proof" eyebrow="ALLOW / DENY Security Proof" title="Authorization decides whether MCP is reached." description={primaryFlow?.summary}>
@@ -951,11 +1026,82 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
           ))}
         </div>
         <AgentTrustAllowDenyFlow />
+        <p className="mt-4 text-sm leading-6 text-slate-500">
+          service_status and restart_service are synthetic demonstration operations used to verify authorization and dispatch behavior; they do not control production infrastructure.
+        </p>
       </LightSection>
 
-      <LightSection id="capabilities" eyebrow="Key Capabilities" title="What this demonstrates." description="A practical security layer for agent tools: cooperative SDK enforcement, independent gateway authorization, audit evidence, and observability.">
-        <LightCapabilityGrid groups={capabilityGroups} />
+      <LightSection id="capabilities" eyebrow="Engineering Contributions" title="Security behavior implemented across SDK, Gateway, Console, and CI." description="The work emphasizes explicit trust boundaries, conservative evidence semantics, and reproducible cross-repository verification.">
+        <LightCapabilityGrid groups={contributionGroups} />
       </LightSection>
+
+      <section className="border-y border-portfolio-border bg-slate-50">
+        <div className={`${pageShell} grid gap-4 py-10 lg:grid-cols-[1.1fr_0.9fr]`}>
+          <article className="rounded-lg border border-blue-100 bg-white p-5 shadow-[0_10px_35px_rgba(15,45,88,0.06)] sm:p-6">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-portfolio-accent">Gateway Observability</p>
+            <h2 className="mt-2 text-2xl font-[720] leading-tight text-[#050b2d]">Instrument the enforcement boundary without exposing protected payloads.</h2>
+            <p className="mt-4 text-sm leading-7 text-slate-600">
+              OpenTelemetry spans describe Gateway processing, while W3C trace context propagates to supported downstream adapters. This does not claim a complete SDK-to-Gateway-to-tool distributed trace.
+            </p>
+            <ul className="mt-5 grid gap-3 md:grid-cols-2">
+              {caseStudy.observability.map((item) => (
+                <li className="flex gap-3 text-sm leading-6 text-slate-600" key={item}>
+                  <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-blue-600" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+
+          <article className="rounded-lg border border-blue-100 bg-white p-5 shadow-[0_10px_35px_rgba(15,45,88,0.06)] sm:p-6">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-portfolio-accent">Read-Only Console</p>
+            <h2 className="mt-2 text-2xl font-[720] leading-tight text-[#050b2d]">Project persisted evidence without turning uncertainty into success.</h2>
+            <ul className="mt-5 space-y-3">
+              {[
+                "Groups Gateway lifecycle records only by invocation_id; request_id remains reusable correlation metadata.",
+                "Labels missing stages as incomplete and conflicting evidence as UNKNOWN instead of selecting a successful interpretation.",
+                "Uses an explicit fixture mode and never substitutes fixtures when the configured audit source fails.",
+                "Does not execute tools, issue credentials, edit policy, or modify Gateway audit records.",
+                "Provides no production authentication or RBAC and is not an operational control plane."
+              ].map((item) => (
+                <li className="flex gap-3 text-sm leading-6 text-slate-600" key={item}>
+                  <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-blue-600" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      {caseStudy.evidence ? (
+        <LightSection id="evidence" eyebrow="Verified Behavior" title="Evidence from tests and local demos." description={caseStudy.evidence.summary}>
+          <div className="grid gap-4 lg:grid-cols-3">
+            {caseStudy.evidence.items.map((item) => (
+              <article className="min-w-0 rounded-lg border border-blue-100 bg-white p-5 shadow-[0_10px_35px_rgba(15,45,88,0.06)]" key={item.title}>
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-portfolio-accent">{item.category}</p>
+                <h3 className="mt-2 text-base font-[720] leading-snug text-[#050b2d]">{item.title}</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
+                {item.transcript ? (
+                  <pre
+                    className="mt-4 block w-full max-w-full overflow-x-auto overflow-y-auto whitespace-pre rounded-md border border-slate-200 bg-slate-950 p-3 text-xs leading-5 text-slate-100 overscroll-x-contain focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2"
+                    tabIndex={0}
+                  >
+                    <code>{item.transcript.join("\n")}</code>
+                  </pre>
+                ) : null}
+                <p className="mt-4 text-sm font-bold leading-6 text-slate-800">{item.result}</p>
+                <p className="mt-2 text-xs leading-5 text-slate-500">{item.limitation}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-5">
+            <LinkButton href={evidenceHref} newTab>
+              Read Public Validation Summary →
+            </LinkButton>
+          </div>
+        </LightSection>
+      ) : null}
 
       <LightSection id="decisions" eyebrow="Engineering Trade-Offs" title="Key engineering decisions" description="Short trade-offs that keep the security claims precise and the implementation inspectable.">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -986,65 +1132,6 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
         </div>
       </LightSection>
 
-      <section className="border-y border-portfolio-border bg-slate-50">
-        <div className={`${pageShell} grid gap-4 py-10 lg:grid-cols-[1.1fr_0.9fr]`}>
-          <article className="rounded-lg border border-blue-100 bg-white p-5 shadow-[0_10px_35px_rgba(15,45,88,0.06)] sm:p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-portfolio-accent">Authentication And Authorization</p>
-            <h2 className="mt-2 text-2xl font-[720] leading-tight text-[#050b2d]">Signed run identity, trusted routing, and exact-scope authorization.</h2>
-            <p className="mt-4 text-sm leading-7 text-slate-600">
-              The gateway verifies short-lived Ed25519 JWT run identity using public verification material only. Trusted claims include issuer, agent ID, audience, run ID, scopes, issued-at time, expiration, and token ID.
-            </p>
-            <ul className="mt-5 grid gap-3 md:grid-cols-2">
-              {caseStudy.security.slice(0, 6).map((item) => (
-                <li className="flex gap-3 text-sm leading-6 text-slate-600" key={item}>
-                  <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-blue-600" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article className="rounded-lg border border-blue-100 bg-white p-5 shadow-[0_10px_35px_rgba(15,45,88,0.06)] sm:p-6">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-portfolio-accent">MCP Integration</p>
-            <h2 className="mt-2 text-2xl font-[720] leading-tight text-[#050b2d]">Narrow stateless tools/call adapter, not a universal MCP gateway.</h2>
-            <div className="mt-5 grid gap-3">
-              {integrations.map((item) => (
-                <div className="rounded-md border border-blue-100 bg-slate-50 p-4" key={item.title}>
-                  <h3 className="text-sm font-bold text-[#050b2d]">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.detail}</p>
-                </div>
-              ))}
-            </div>
-          </article>
-        </div>
-      </section>
-
-      {caseStudy.evidence ? (
-        <LightSection id="evidence" eyebrow="Verified Behavior" title="Evidence from tests and local demos." description={caseStudy.evidence.summary}>
-          <div className="grid gap-4 lg:grid-cols-3">
-            {caseStudy.evidence.items.map((item) => (
-              <article className="rounded-lg border border-blue-100 bg-white p-5 shadow-[0_10px_35px_rgba(15,45,88,0.06)]" key={item.title}>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-portfolio-accent">{item.category}</p>
-                <h3 className="mt-2 text-base font-[720] leading-snug text-[#050b2d]">{item.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-600">{item.description}</p>
-                {item.transcript ? (
-                  <pre className="mt-4 max-h-44 overflow-auto rounded-md border border-slate-200 bg-slate-950 p-3 text-xs leading-5 text-slate-100">
-                    <code>{item.transcript.join("\n")}</code>
-                  </pre>
-                ) : null}
-                <p className="mt-4 text-sm font-bold leading-6 text-slate-800">{item.result}</p>
-                <p className="mt-2 text-xs leading-5 text-slate-500">{item.limitation}</p>
-              </article>
-            ))}
-          </div>
-          <div className="mt-5">
-            <LinkButton href={evidenceHref} newTab>
-              Read Public SDK Evidence →
-            </LinkButton>
-          </div>
-        </LightSection>
-      ) : null}
-
       <LightSection id="scope" eyebrow="Scope And Limitations" title="Current scope, with the boundary named." description="AgentTrust is useful as a least-privilege and audit initiative across SDK and gateway layers. Strong gateway enforcement still depends on topology preventing direct upstream bypass.">
         <div className="grid gap-4 lg:grid-cols-2">
           <ScopePanel title="Current Scope" items={currentScope} tone="current" />
@@ -1061,7 +1148,7 @@ function AgentTrustPage({ caseStudy }: { caseStudy: CaseStudy }) {
           <div className="flex flex-wrap gap-3">
             {caseStudy.articleHref ? (
               <LinkButton href={caseStudy.articleHref} variant="primary">
-                Read Engineering Insight →
+                Read the Zero Trust MCP article →
               </LinkButton>
             ) : null}
             <LinkButton href={caseStudy.repositoryUrl} newTab variant="primary">
@@ -1519,8 +1606,22 @@ function ObservabilityExperiencePage({ caseStudy }: { caseStudy: CaseStudy }) {
 }
 
 function AgentTrustAllowDenyFlow() {
-  const allowSteps = ["authenticate", "resolve service_status", "authorize ALLOW", "audit decision", "MCP execution", "execution_result ok"];
-  const denySteps = ["authenticate", "resolve restart_service", "authorize DENY", "audit not_executed", "NO MCP invocation"];
+  const allowSteps = [
+    "persist invocation_received",
+    "authenticate and resolve service_status",
+    "persist authorization_decision: ALLOW",
+    "validate input and acquire bounded capacity",
+    "persist execution_attempted",
+    "configured MCP tools/call dispatch",
+    "persist observed terminal outcome"
+  ];
+  const denySteps = [
+    "persist invocation_received",
+    "authenticate and resolve restart_service",
+    "persist authorization_decision: DENY / NOT_EXECUTED",
+    "no execution_attempted stage",
+    "NO protected MCP invocation"
+  ];
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -1537,7 +1638,7 @@ function AgentTrustAllowDenyFlow() {
           ))}
         </ol>
         <p className="mt-4 rounded-md border border-emerald-100 bg-emerald-50 p-3 text-sm font-bold leading-6 text-emerald-800">
-          Demo evidence: MCP invocation count = 1.
+          Recorded demo evidence: MCP invocation count = 1 and a successful terminal result was observed.
         </p>
       </article>
 
@@ -1554,7 +1655,7 @@ function AgentTrustAllowDenyFlow() {
           ))}
         </ol>
         <p className="mt-4 rounded-md border border-red-100 bg-red-50 p-3 text-sm font-bold leading-6 text-red-800">
-          Demo evidence: result_status=not_executed and MCP invocation count = 0.
+          Recorded demo evidence: NOT_EXECUTED and MCP invocation count = 0.
         </p>
       </article>
     </div>

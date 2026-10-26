@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1774" height="887" viewBox="0 0 1774 887" role="img" aria-labelledby="title description">
+  <title id="title">AgentTrust protected tool execution flow</title>
+  <desc id="description">The Gateway assigns an invocation identifier and persists receipt evidence before authentication. It verifies the JWT, resolves trusted tool configuration, evaluates exact scope, and persists an authorization decision. Denied requests stop without dispatch. Allowed requests validate input, acquire bounded capacity, persist dispatch intent, invoke configured MCP tools call, and record a canonical terminal outcome.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eef6ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="8" stdDeviation="13" flood-color="#123a70" flood-opacity="0.12"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1769ff"/></marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#16895a"/></marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#d63838"/></marker>
+    <style>
+      .title{font:700 42px Inter,ui-sans-serif,system-ui,sans-serif;fill:#07123f}.subtitle{font:400 20px Inter,ui-sans-serif,system-ui,sans-serif;fill:#55709e}.step-title{font:700 18px Inter,ui-sans-serif,system-ui,sans-serif;fill:#07123f}.copy{font:400 14px Inter,ui-sans-serif,system-ui,sans-serif;fill:#526985}.label{font:700 12px Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:1.4px;fill:#1769ff}.mono{font:600 13px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#173e75}.status{font:700 15px Inter,ui-sans-serif,system-ui,sans-serif}.note{font:600 14px Inter,ui-sans-serif,system-ui,sans-serif;fill:#6b4e00}
+    </style>
+  </defs>
+  <rect width="1774" height="887" rx="28" fill="url(#background)"/>
+  <circle cx="1630" cy="100" r="255" fill="#ddebff" opacity="0.36"/>
+  <text x="887" y="60" text-anchor="middle" class="title">Protected Tool Execution</text>
+  <text x="887" y="94" text-anchor="middle" class="subtitle">Required audit gates, exact-scope authorization, and conservative execution outcomes</text>
+
+  <rect x="90" y="118" width="1594" height="54" rx="14" fill="#e9f3ff" stroke="#bdd8ff"/>
+  <text x="887" y="151" text-anchor="middle" class="mono">invocation_id = Gateway-generated lifecycle key   •   request_id = reusable correlation metadata</text>
+
+  <!-- Main sequence -->
+  <g filter="url(#shadow)"><rect x="70" y="220" width="240" height="166" rx="18" fill="#fff" stroke="#b9d6ff" stroke-width="2"/></g>
+  <circle cx="100" cy="250" r="18" fill="#1769ff"/><text x="100" y="256" text-anchor="middle" font-family="system-ui" font-size="15" font-weight="700" fill="#fff">1</text>
+  <text x="130" y="247" class="label">RECEIVE</text>
+  <text x="92" y="286" class="step-title">Assign invocation_id</text>
+  <text x="92" y="316" class="copy">Persist required receipt:</text>
+  <text x="92" y="343" class="mono">invocation_received</text>
+  <text x="92" y="370" class="copy">Failure prevents processing</text>
+
+  <g filter="url(#shadow)"><rect x="352" y="220" width="240" height="166" rx="18" fill="#fff" stroke="#b9d6ff" stroke-width="2"/></g>
+  <circle cx="382" cy="250" r="18" fill="#1769ff"/><text x="382" y="256" text-anchor="middle" font-family="system-ui" font-size="15" font-weight="700" fill="#fff">2</text>
+  <text x="412" y="247" class="label">AUTHENTICATE</text>
+  <text x="374" y="286" class="step-title">Verify Ed25519 JWT</text>
+  <text x="374" y="316" class="copy">Signature, issuer, audience,</text>
+  <text x="374" y="340" class="copy">expiry, identity and scopes</text>
+  <text x="374" y="370" class="copy">Invalid identity fails closed</text>
+
+  <g filter="url(#shadow)"><rect x="634" y="220" width="240" height="166" rx="18" fill="#fff" stroke="#b9d6ff" stroke-width="2"/></g>
+  <circle cx="664" cy="250" r="18" fill="#1769ff"/><text x="664" y="256" text-anchor="middle" font-family="system-ui" font-size="15" font-weight="700" fill="#fff">3</text>
+  <text x="694" y="247" class="label">RESOLVE</text>
+  <text x="656" y="286" class="step-title">Load trusted mapping</text>
+  <text x="656" y="316" class="copy">Logical tool → route</text>
+  <text x="656" y="340" class="copy">Logical tool → exact scope</text>
+  <text x="656" y="370" class="copy">Caller cannot choose policy target</text>
+
+  <g filter="url(#shadow)"><rect x="916" y="220" width="240" height="166" rx="18" fill="#fff" stroke="#b9d6ff" stroke-width="2"/></g>
+  <circle cx="946" cy="250" r="18" fill="#1769ff"/><text x="946" y="256" text-anchor="middle" font-family="system-ui" font-size="15" font-weight="700" fill="#fff">4</text>
+  <text x="976" y="247" class="label">AUTHORIZE</text>
+  <text x="938" y="286" class="step-title">Compare exact scope</text>
+  <text x="938" y="316" class="copy">Persist required decision:</text>
+  <text x="938" y="343" class="mono">authorization_decision</text>
+  <text x="938" y="370" class="copy">ALLOW does not mean success</text>
+
+  <path d="M310 303h27" stroke="#1769ff" stroke-width="4" marker-end="url(#arrow)"/>
+  <path d="M592 303h27" stroke="#1769ff" stroke-width="4" marker-end="url(#arrow)"/>
+  <path d="M874 303h27" stroke="#1769ff" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <!-- Branches -->
+  <path d="M1036 386v65h-575v55" stroke="#d63838" stroke-width="4" fill="none" marker-end="url(#arrowRed)"/>
+  <text x="723" y="440" class="status" fill="#bb2d2d">DENY / authentication or pre-dispatch failure</text>
+  <g filter="url(#shadow)"><rect x="250" y="515" width="420" height="165" rx="18" fill="#fff7f7" stroke="#ffc0c0" stroke-width="2"/></g>
+  <text x="278" y="549" class="label" style="fill:#bf2a2a">STOP BEFORE HANDOFF</text>
+  <text x="278" y="585" class="step-title">NOT_EXECUTED</text>
+  <text x="278" y="614" class="copy">No execution_attempted stage</text>
+  <text x="278" y="641" class="copy">No protected MCP invocation</text>
+  <text x="278" y="666" class="copy">Denied demonstration count = 0</text>
+
+  <path d="M1156 303h110v202" stroke="#16895a" stroke-width="4" fill="none" marker-end="url(#arrowGreen)"/>
+  <text x="1180" y="286" class="status" fill="#147a51">ALLOW</text>
+  <g filter="url(#shadow)"><rect x="910" y="515" width="360" height="165" rx="18" fill="#f3fff9" stroke="#a9e4c9" stroke-width="2"/></g>
+  <text x="938" y="549" class="label" style="fill:#16895a">PREPARE DISPATCH</text>
+  <text x="938" y="585" class="step-title">Validate + bounded admission</text>
+  <text x="938" y="614" class="copy">Persist required dispatch intent:</text>
+  <text x="938" y="641" class="mono">execution_attempted</text>
+  <text x="938" y="666" class="copy">Failure still prevents handoff</text>
+
+  <g filter="url(#shadow)"><rect x="1320" y="515" width="384" height="165" rx="18" fill="#fff" stroke="#a9cdfd" stroke-width="2"/></g>
+  <text x="1348" y="549" class="label">PROTECTED EXECUTION</text>
+  <text x="1348" y="585" class="step-title">Configured MCP tools/call</text>
+  <text x="1348" y="614" class="copy">Bounded response and timeout handling</text>
+  <text x="1348" y="641" class="copy">Persist execution_result when possible</text>
+  <text x="1348" y="666" class="copy">No SDK retry or direct fallback</text>
+  <path d="M1270 597h35" stroke="#16895a" stroke-width="4" marker-end="url(#arrowGreen)"/>
+
+  <!-- Canonical states -->
+  <text x="70" y="735" class="label">CANONICAL EXECUTION OUTCOMES</text>
+  <g>
+    <rect x="70" y="756" width="385" height="90" rx="14" fill="#f0fff8" stroke="#a9e4c9"/>
+    <text x="92" y="786" class="status" fill="#147a51">SUCCEEDED</text>
+    <text x="92" y="814" class="copy">Valid successful application result observed</text>
+    <rect x="475" y="756" width="385" height="90" rx="14" fill="#fff4f4" stroke="#ffc0c0"/>
+    <text x="497" y="786" class="status" fill="#bb2d2d">FAILED</text>
+    <text x="497" y="814" class="copy">Complete, confirmed application failure observed</text>
+    <rect x="880" y="756" width="385" height="90" rx="14" fill="#f4f7fa" stroke="#cad5e1"/>
+    <text x="902" y="786" class="status" fill="#40566f">NOT_EXECUTED</text>
+    <text x="902" y="814" class="copy">A pre-dispatch gate prevented handoff</text>
+    <rect x="1285" y="756" width="419" height="90" rx="14" fill="#fff9e8" stroke="#f0d48a"/>
+    <text x="1307" y="786" class="status" fill="#8a6400">UNKNOWN</text>
+    <text x="1307" y="814" class="copy">Possible handoff; final state cannot be established</text>
+  </g>
+  <text x="887" y="874" text-anchor="middle" class="note">UNKNOWN is not automatically safe to retry because the protected operation may already have started.</text>
+</svg>

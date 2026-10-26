@@ -546,9 +546,9 @@ export const caseStudies = [
       {
         title: "Least Privilege",
         items: [
-          "short-lived scoped run identity",
-          "per-agent and per-tool grants",
-          "deny-by-default unknown agents",
+          "expiring scoped run identity",
+          "local SDK policy and gateway exact scopes",
+          "deny-by-default unknown tools",
           "out-of-scope action rejection"
         ]
       },
@@ -565,7 +565,7 @@ export const caseStudies = [
         title: "Auditability And Observability",
         items: [
           "allow and deny audit records",
-          "agent/run/tool/scope correlation",
+          "invocation lifecycle correlation",
           "authorization vs execution lifecycle",
           "traces and Prometheus-compatible metrics"
         ]
@@ -578,12 +578,13 @@ export const caseStudies = [
       "The separately maintained gateway demonstrates independent authorization before configured MCP execution.",
       "Strong gateway enforcement assumes deployment topology prevents direct upstream bypass.",
       "Required scopes and MCP routing come from trusted configuration, not caller input.",
+      "The host, issuer, gateway configuration, and deployment operator remain trusted parts of the local reference boundary.",
       "The current audit sinks are local JSONL, not immutable or tamper-evident storage.",
       "The initiative avoids production SaaS, multi-tenancy, enterprise IAM, dynamic policy management, and durable centralized audit claims."
     ],
     architecture: {
       summary:
-        "AgentTrust has two complementary layers: a public SDK for cooperative in-process enforcement and a separately maintained gateway that independently verifies signed run identity, resolves trusted tool metadata, authorizes exact scopes, audits the decision, and invokes protected MCP tools only after ALLOW.",
+        "AgentTrust has two complementary layers: a public SDK for cooperative in-process enforcement and a separately maintained gateway that independently verifies externally issued Ed25519 JWT identity, resolves trusted tool metadata, authorizes exact scopes, persists required pre-dispatch evidence, and invokes configured protected tools only after ALLOW.",
       securityBoundaryPath: [
         "Host / Agent",
         "AgentTrust SDK",
@@ -602,7 +603,9 @@ export const caseStudies = [
         "Trusted tool registry",
         "Exact-scope authorizer",
         "Protected MCP tools",
-        "Audit and observability"
+        "Structured audit evidence",
+        "Read-only Console",
+        "Gateway observability"
       ],
       telemetry: ["Structured logs", "OpenTelemetry traces", "Prometheus-compatible metrics", "JSONL audit evidence"]
     },
@@ -612,7 +615,8 @@ export const caseStudies = [
         owns: [
           "cooperative run-scoped identity",
           "in-process scope authorization",
-          "guarded direct, async, MCP, and LangChain calls"
+          "typed synchronous and asynchronous gateway clients",
+          "guarded local, MCP, and LangChain calls"
         ],
         exposes: ["start run", "call", "acall", "guarded decorator"],
         dependsOn: ["policy configuration", "JWT signing secret", "local process time"],
@@ -629,27 +633,41 @@ export const caseStudies = [
         exposes: ["POST /v1/tools/{tool}/execute", "GET /healthz", "GET /readyz", "GET /metrics"],
         dependsOn: ["Ed25519 public verification key", "trusted gateway config", "configured MCP endpoint"],
         persistence: "Local JSONL audit evidence; no durable centralized audit store"
+      },
+      {
+        service: "AgentTrust Console",
+        owns: [
+          "read-only Gateway audit lifecycle projection",
+          "invocation_id grouping and integrity classification",
+          "explicit fixture and legacy SDK viewing modes"
+        ],
+        exposes: ["overview", "audit explorer", "invocation detail"],
+        dependsOn: ["bounded read-only audit source", "trusted operator source selection"],
+        persistence: "No database and no audit mutation; the configured Gateway evidence is read-only"
       }
     ],
     requestFlows: [
       {
         title: "Gateway-Protected MCP Execution",
         summary:
-          "The flagship demo grants deploy-agent service.status and logs.read. service_status is allowed and reaches MCP once; restart_service requires service.restart and is denied before MCP invocation.",
+          "The flagship demo grants deploy-agent service.status and logs.read. service_status is allowed and reaches the protected MCP tool once; restart_service requires service.restart and is denied before dispatch.",
         layout: "authorization-branch",
         steps: [
-          "Gateway receives signed run identity",
-          "Verify issuer, audience, expiry, run ID, token ID, and scopes",
-          "Resolve trusted AgentTrust tool",
-          "Read required scope from gateway config",
-          "Exact string authorization"
+          "Receive invocation, generate invocation_id, and persist invocation_received",
+          "Verify Ed25519 JWT signature and required claims",
+          "Resolve the logical tool and required scope from trusted gateway configuration",
+          "Evaluate the token scopes using exact string authorization",
+          "Persist the authorization decision",
+          "On ALLOW, validate input, acquire bounded capacity, and persist execution_attempted",
+          "Dispatch the configured HTTP or stateless MCP adapter and record terminal evidence when possible"
         ],
         branches: {
-          deny: ["restart_service requires service.restart", "Audit deny not_executed", "MCP invocation count = 0"],
-          allow: ["service_status requires service.status", "MCP tools/call executes", "Audit execution_result ok"]
+          deny: ["restart_service requires service.restart", "DENY / NOT_EXECUTED", "No execution_attempted", "MCP invocation count = 0"],
+          allow: ["service_status requires service.status", "Required dispatch-intent audit", "Configured MCP tools/call executes", "Terminal status is recorded when possible"]
         },
         notes: [
-          "Authorization precedes MCP execution.",
+          "Required receipt, authorization-decision, and dispatch-intent audit failures prevent execution.",
+          "An ALLOW decision does not establish that execution succeeded.",
           "Unknown tools and missing scopes fail closed.",
           "The SDK implementation is public; the enforcement-gateway implementation is maintained separately."
         ]
@@ -670,7 +688,7 @@ export const caseStudies = [
         context:
           "The gateway should verify identities without holding the signing authority's private key.",
         decision:
-          "Use short-lived asymmetric JWT run identity with issuer, agent ID, audience, run ID, scopes, issued-at, expiration, and token ID claims.",
+          "Use expiring asymmetric JWT run identity with issuer, agent ID, audience, run ID, scopes, issued-at, expiration, and token ID claims.",
         consequence:
           "Signing authority stays separate from enforcement; production key rotation and JWKS remain future work."
       },
@@ -688,9 +706,9 @@ export const caseStudies = [
         context:
           "Operators and future Console views need to distinguish authorization from execution without guessing from nullable fields.",
         decision:
-          "Emit authorization_decision and execution_result lifecycle records correlated by request_id.",
+          "Group receipt, authorization, dispatch-intent, and terminal evidence by a Gateway-generated invocation_id; retain request_id as reusable correlation metadata.",
         consequence:
-          "One logical request remains one logical tool call, but JSONL remains non-durable and not tamper-proof."
+          "The Console can project distinct invocations without treating ALLOW as success, but JSONL remains non-durable and not tamper-proof."
       }
     ],
     reliability: [
@@ -700,19 +718,19 @@ export const caseStudies = [
       },
       {
         scenario: "Missing required scope",
-        behavior: "The gateway emits authorization_decision deny, result_status not_executed, and does not invoke MCP."
+        behavior: "The gateway records DENY / NOT_EXECUTED, emits no execution_attempted stage, and does not invoke the protected tool."
       },
       {
         scenario: "Unknown AgentTrust tool",
         behavior: "Tool resolution fails closed; caller input is not used to construct an arbitrary upstream request."
       },
       {
-        scenario: "Authorization audit persistence failure",
-        behavior: "The gateway fails closed before execution so the protected upstream is not invoked."
+        scenario: "Required pre-dispatch audit failure",
+        behavior: "A failure to persist receipt, authorization-decision, or dispatch-intent evidence prevents protected execution."
       },
       {
-        scenario: "MCP execution failure",
-        behavior: "Protocol errors, tool execution errors, timeouts, and unavailable upstreams remain execution failures after an allow decision."
+        scenario: "Execution outcome",
+        behavior: "Confirmed application errors are FAILED. Transport interruption, timeout, malformed response, or incomplete post-handoff evidence can remain UNKNOWN because dispatch may have occurred."
       },
       {
         scenario: "Post-execution audit persistence failure",
@@ -724,13 +742,14 @@ export const caseStudies = [
       "Gateway enforcement independently verifies signed Ed25519 JWT run identity before protected MCP execution.",
       "Trusted gateway configuration determines the upstream MCP URL, MCP tool mapping, required scope, timeout, and controlled headers.",
       "Authorization is exact string matching: service.restart is not service.*, SERVICE.RESTART, or an inherited permission.",
-      "Denied restart_service requests are audited as not_executed and do not produce an MCP invocation.",
+      "Denied restart_service requests are audited as NOT_EXECUTED, produce no execution_attempted stage, and do not produce an MCP invocation.",
       "Raw JWTs, Authorization headers, raw MCP arguments, keys, and sensitive payloads are excluded from telemetry and audit additions."
     ],
     observability: [
-      "OpenTelemetry spans cover authenticate, resolve tool, authorize, authorization audit, MCP execution, and execution-result audit boundaries.",
+      "Gateway OpenTelemetry spans cover authentication, trusted tool resolution, authorization, required audit stages, protected execution, and terminal audit boundaries.",
       "Prometheus-compatible metrics distinguish authentication success/failure, authorization allow/deny, MCP ok/error/timeout, tool execution status, and audit write failure.",
-      "Structured logs, traces, metrics, and JSONL audit evidence correlate through request_id and trace_id where tracing is active.",
+      "Structured audit stages group by Gateway-generated invocation_id; request_id remains reusable correlation metadata and trace_id connects instrumented telemetry where tracing is active.",
+      "W3C trace context propagates from the Gateway to supported downstream adapters; complete SDK-to-Gateway-to-tool distributed tracing is not claimed.",
       "Denied requests include authorization evidence but intentionally have no MCP execution span and no MCP request metric.",
       "Safe telemetry excludes raw JWTs, raw MCP arguments, Authorization headers, key material, and sensitive MCP response bodies."
     ],
@@ -751,7 +770,7 @@ export const caseStudies = [
           residualRisk: "Policy authors can still grant overly broad scopes."
         },
         {
-          threat: "Expired, tampered, or wrong-secret credential",
+          threat: "Expired, tampered, or invalidly signed credential",
           status: "MITIGATED",
           mitigation: "Automated tests verify fail-closed expiry and JWT validation behavior; gateway verification uses Ed25519 public material.",
           residualRisk: "Production issuer service, JWKS, revocation, and key rotation are not implemented."
@@ -786,9 +805,9 @@ export const caseStudies = [
       title: "Verified Runtime Evidence",
       summary:
         "The primary evidence scenario proves the gateway blocks an authenticated but unauthorized restart_service request before MCP execution while allowing service_status for the same deploy-agent identity.",
-      sourceUrl: `${agentTrustDocsBase}/evidence/README.md`,
+      sourceUrl: `${agentTrustDocsBase}/mvp-overview.md`,
       boundary:
-        "Verified locally with synthetic data. The public SDK implementation is linked; the enforcement-gateway implementation is maintained separately and has no public source CTA.",
+        "Recorded candidate-revision evidence includes 321 Python tests with zero skips, 25 Console test cases, Go test/race/vet/build checks, reviewed cross-repository validation, and isolated Docker enforcement checks. These retained results were not freshly executed for this page and do not certify current HEAD or production readiness.",
       items: [
         {
           title: "Gateway ALLOW/DENY proof",
@@ -801,7 +820,7 @@ export const caseStudies = [
             "ALLOW service_status required_scope=service.status HTTP_STATUS=200",
             "MCP counters: service_status=1",
             "DENY restart_service required_scope=service.restart HTTP_STATUS=403 ACCESS_DENIED",
-            "Audit: decision=deny reason=scope_not_granted result_status=not_executed",
+            "Audit: authorization=DENY execution=NOT_EXECUTED",
             "MCP counters: restart_service=0"
           ],
           result:
@@ -810,34 +829,36 @@ export const caseStudies = [
             "This does not claim an absolute boundary if the protected MCP server is independently reachable."
         },
         {
-          title: "Authentication and authorization tests",
+          title: "Recorded cross-repository validation",
           category: "Automated test evidence",
           description:
-            "Tests cover missing/invalid tokens, issuer/audience/expiry validation, exact-scope authorization, unknown tools, audit-failure behavior, and no upstream execution on deny.",
+            "The reviewed candidate pair recorded 321 Python tests with zero skips, 25 Console cases, and Go test, race-detector, vet, and build checks. Coverage includes invalid tokens, exact scopes, unknown tools, audit failures, and zero upstream execution on deny.",
           transcript: [
-            "go test ./...",
-            "go test -race ./...",
+            "Python candidate suite: 321 passed, 0 skipped",
+            "Console candidate suite: 25 cases passed",
+            "Gateway: test, race detector, vet, build",
             "DENY restart_service -> upstream invocation count zero"
           ],
           result:
             "Covered invalid credential and missing-scope cases fail closed before protected tool execution.",
           limitation:
-            "This does not claim production key rotation, token revocation, or enterprise IAM."
+            "Results apply to the recorded candidate revisions; they were not rerun for this website update and do not claim production certification."
         },
         {
           title: "Audit and observability evidence",
           category: "Operational evidence",
           description:
-            "Audit lifecycle records distinguish authorization decisions from execution outcomes, while traces and metrics expose ALLOW, DENY, timeout, error, and not-executed paths.",
+            "Four-stage audit evidence distinguishes request receipt, authorization, transport handoff, and terminal outcome. The Console projects these records by invocation_id and preserves incomplete or conflicting evidence as uncertainty.",
           transcript: [
-            "authorization_decision decision=allow reason=scope_granted",
-            "execution_result result_status=ok reason=execution_ok",
-            "authorization_decision decision=deny reason=scope_not_granted result_status=not_executed",
+            "invocation_received",
+            "authorization_decision: ALLOW | DENY | UNKNOWN",
+            "execution_attempted (authorized dispatch only)",
+            "execution_result: SUCCEEDED | FAILED | NOT_EXECUTED | UNKNOWN",
             "DENY trace: authorization span present, no MCP execution span",
             "DENY metrics: authorization deny incremented, no MCP request increment"
           ],
           result:
-            "Operators can correlate request_id and trace_id across logs, traces, metrics, and audit evidence without counting lifecycle events as two tool calls.",
+            "Operators can group one invocation by invocation_id while retaining request_id for reusable request correlation; ALLOW never becomes fabricated success.",
           limitation:
             "Local JSONL audit is not immutable, tamper-evident, centralized, or SIEM-integrated."
         }
@@ -854,11 +875,11 @@ export const caseStudies = [
       },
       {
         label: "Gateway demo: denied call does not execute",
-        detail: "The denied restart_service path records result_status=not_executed and leaves MCP restart_service invocation count at zero."
+        detail: "The denied restart_service path records NOT_EXECUTED, emits no execution_attempted stage, and leaves the MCP invocation count at zero."
       },
       {
-        label: "Audit lifecycle: one logical call",
-        detail: "authorization_decision and execution_result records correlate by request_id without turning one request into two tool calls."
+        label: "Audit lifecycle: one protected invocation",
+        detail: "Receipt, authorization, dispatch-intent, and terminal records group by Gateway-generated invocation_id; request_id remains correlation metadata."
       },
       {
         label: "Automated tests: invalid credentials rejected",
@@ -885,7 +906,7 @@ export const caseStudies = [
       "JSONL evidence is inspectable, but not durable, centralized, immutable, or tamper-proof.",
       "A stateless MCP tools/call adapter is narrow and testable, but not a universal MCP transport gateway.",
       "Authorization audit failure fails closed before execution; post-execution audit failure cannot undo possible side effects.",
-      "request_id is the application/audit correlation key, while trace_id connects distributed telemetry."
+      "invocation_id is the audit lifecycle grouping key, request_id is reusable application correlation, and trace_id connects instrumented telemetry."
     ],
     nonGoals: [
       "No production SaaS or commercial availability claim.",
@@ -902,7 +923,7 @@ export const caseStudies = [
       "Policy/control plane with careful change governance.",
       "Tenant-aware authorization and organization-level administration.",
       "MCP server identity and gateway deployment reference patterns.",
-      "Richer Console integration over normalized lifecycle evidence."
+      "Authenticated Console deployment and durable evidence ingestion."
     ],
     sectionTitles: {
       demonstrates: "AI security capabilities made inspectable.",
